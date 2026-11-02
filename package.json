@@ -18,9 +18,17 @@
     "node": ">=20"
   },
   "license": "MIT",
+  "author": "Ionian Labs (https://ionian.dev)",
   "repository": {
     "type": "git",
-    "url": "github:ionianlabs/brain"
+    "url": "git+https://github.com/ionianlabs/brain.git"
+  },
+  "homepage": "https://github.com/ionianlabs/brain#readme",
+  "bugs": {
+    "url": "https://github.com/ionianlabs/brain/issues"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "keywords": [
     "agents",
