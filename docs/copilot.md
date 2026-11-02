@@ -11,7 +11,7 @@ The simplest route is the plugin. It works in Copilot CLI and in VS Code, and it
 
 If your organization blocks plugins, use one of the two routes below. Neither puts files into your work repo.
 
-## Personal skills
+## Personal skills.
 
 Copilot reads personal skills from `~/.copilot/skills/`, in VS Code and in Copilot CLI. Copy the two skill folders there:
 
@@ -22,7 +22,7 @@ cp -R ~/brain/skills/brief ~/brain/skills/handover ~/.copilot/skills/
 
 Then run `/brief` or `/handover`. The paths inside the skills were filled in with the absolute path of your brain when you ran `init`, so the copies work from any folder. If you also install the plugin, remove these copies.
 
-## Prompt files
+## Prompt files.
 
 VS Code also runs prompt files. Its local agent reads them, Copilot CLI does not, and VS Code plans to replace them with skills. The brain ships two in `.github/prompts/`. They only show up as `/brief` and `/handover` when the brain folder is the open workspace. To run them from inside a work repo, copy them into your VS Code user prompts:
 

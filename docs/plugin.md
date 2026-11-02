@@ -11,7 +11,7 @@ The plugin brings the `brief` and `handover` skills to every repo you work in. I
 
 One plugin folder serves three agents: Claude Code, GitHub Copilot CLI and Copilot in VS Code. They all read the same format.
 
-## Before you install
+## Before you install.
 
 The plugin looks for the brain in `~/brain`. If there is none yet, say "brief" after you install, and the agent offers to create it. The plugin carries the CLI, so you need only Node 20 or newer. To use another folder, set the `BRAIN_DIR` environment variable, for example in your shell profile:
 
@@ -19,7 +19,7 @@ The plugin looks for the brain in `~/brain`. If there is none yet, say "brief" a
 export BRAIN_DIR="$HOME/notes/brain"
 ```
 
-## Claude Code
+## Claude Code.
 
 In a session:
 
@@ -34,7 +34,7 @@ Say "brief" or run `/brain:brief`. At the end of a session, say "handover" or ru
 
 To update, run `claude plugin update brain@ionianlabs`, or turn on auto-update for the marketplace in `/plugin`. Updates load in the next session.
 
-## GitHub Copilot CLI
+## GitHub Copilot CLI.
 
 ```sh
 copilot plugin marketplace add ionianlabs/brain
@@ -47,7 +47,7 @@ To update, run `copilot plugin marketplace update ionianlabs`, then `copilot plu
 
 If your Copilot uses a GitHub Enterprise host, `owner/repo` resolves against that host. Use the full URL instead: `copilot plugin marketplace add https://github.com/ionianlabs/brain`.
 
-## Copilot in VS Code
+## Copilot in VS Code.
 
 Add the marketplace in your user settings. The setting replaces the default list, so keep the default entry:
 
@@ -63,7 +63,7 @@ Plugins, skills and hooks are on by default. An organization can turn them off b
 
 The session-start script runs only in a trusted workspace. It is also off when your organization turns off Copilot preview features. The skills still work then, and find the brain through `BRAIN_DIR` or `~/brain`.
 
-## What the plugin does
+## What the plugin does.
 
 - **Skills.** `brief` reads the brain and reports what needs you today. It never edits anything. `handover` updates one project's state file and log, then rebuilds the index and runs lint.
 - **CLI.** A copy of the brain CLI, in `cli/`. The skills use it to rebuild the index, run lint and create a brain.
@@ -71,7 +71,7 @@ The session-start script runs only in a trusted workspace. It is also off when y
 
 The session-start script states the path only. It never reads or sends the content of your notes, so nothing from one client reaches a session in another client's repo. It writes no files into the repo you work in. If Node is missing or the script fails, the session goes on without it.
 
-## How the skills find the brain
+## How the skills find the brain.
 
 Each skill looks in this order:
 
@@ -81,7 +81,7 @@ Each skill looks in this order:
 
 If none of them holds an `AGENTS.md`, the skill stops and offers to create a brain.
 
-## Without the plugin
+## Without the plugin.
 
 Clone the repo and run the CLI from it:
 

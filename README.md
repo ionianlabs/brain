@@ -1,12 +1,17 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/banner-dark.png">
+  <img src="docs/images/banner.png" alt="Ionian Brain: One memory. Every agent." width="100%">
+</picture>
+
 # Ionian Brain
 
 One memory for all agents, in plain markdown.
 
-## The problem
+## The problem.
 
 Every agent chat starts at zero. The context lives in your head, in old chats and in copy-paste. You explain the same project again, and the agent still gets it wrong.
 
-## Quickstart
+## Quickstart.
 
 Add the plugin to your agent. It brings the `brief` and `handover` skills to every repo, and tells each new session where your brain is.
 
@@ -34,7 +39,7 @@ Details, updates and the routes without the plugin are in [The Brain plugin](htt
 
 Node 20 or newer is the only requirement. If you want no tooling at all, click "Use this template" on [`ionianlabs/brain-template`](https://github.com/ionianlabs/brain-template) and clone it.
 
-### Add your own project
+### Add your own project.
 
 Copy `templates/project.md` to `projects/<slug>.md` and `templates/log.md` to `logs/<slug>.md`, fill in the frontmatter, then run `brain index`. Or ask your agent to start a project. `AGENTS.md` has the steps.
 
@@ -42,7 +47,7 @@ Copy `templates/project.md` to `projects/<slug>.md` and `templates/log.md` to `l
 
 For a walk through one full day, read [A day with Brain](https://github.com/ionianlabs/brain/blob/main/docs/a-day-with-brain.md).
 
-## What is in the folder
+## What is in the folder.
 
 ```
 ~/brain/
@@ -59,7 +64,7 @@ For a walk through one full day, read [A day with Brain](https://github.com/ioni
 
 `CLAUDE.md` and `.github/copilot-instructions.md` are one-line pointers to `AGENTS.md`.
 
-## How it works
+## How it works.
 
 Read at the start, write at the end.
 
@@ -67,7 +72,7 @@ At the start, the agent reads `AGENTS.md`, then `index.md`, then the state file 
 
 I will be honest. Reading is easy. Writing is the habit that matters, and it is the part people skip. The `handover` skill exists to make it cheap: one word, and the agent does the bookkeeping.
 
-## What a project file looks like
+## What a project file looks like.
 
 A state file describes the present. It never holds history. It has four sections, always in this order: Now, Open, People, Links.
 
@@ -80,7 +85,7 @@ A state file describes the present. It never holds history. It has four sections
 
 Owner and due date are optional. Done items move to the log, which is a list of dated entries, newest first, with `Decision:` and `Done:` bullets. That split is why the state file stays short enough to read in full every time. See the [sample brain](https://github.com/ionianlabs/brain/blob/main/examples/sample-brain/index.md) for a filled example.
 
-## What the brief gives you
+## What the brief gives you.
 
 Say "brief" and the agent reports what needs you today. It reads, and it never edits.
 
@@ -96,7 +101,7 @@ The report is grouped by org, with `personal` last. Each org gets these sections
 
 Each org ends with one line, "No due date: N open items".
 
-## What Brain adds on top of OKF
+## What Brain adds on top of OKF.
 
 | Addition | What it does | Why |
 |---|---|---|
@@ -109,13 +114,13 @@ Each org ends with one line, "No due date: N open items".
 
 A brain stays a valid OKF v0.2 bundle, so any OKF tool can read it.
 
-## Works with
+## Where it works.
 
 - **Claude Code.** The plugin, or a `CLAUDE.md` pointer and the `brief` and `handover` skills in the brain folder. Without the plugin, `init --link-skills` symlinks the skills into `~/.claude/skills/`, so they work in every project. Existing skills with the same name are left alone.
 - **GitHub Copilot.** The plugin, in Copilot CLI and in VS Code. Without it, `.github/copilot-instructions.md` and two prompt files, `/brief` and `/handover`. See [docs/copilot.md](https://github.com/ionianlabs/brain/blob/main/docs/copilot.md) to use them from inside a work repo.
 - **Any agent that can read a file.** Point it at `AGENTS.md`.
 
-## CLI
+## CLI.
 
 Three commands. The CLI only keeps the folder in shape. It never talks to a model.
 
@@ -138,7 +143,7 @@ Exit codes: 0 ok, 1 errors found, 2 usage error. `lint` never writes files.
 
 The full contract is in [docs/spec.md](https://github.com/ionianlabs/brain/blob/main/docs/spec.md).
 
-## Principles
+## Principles.
 
 - Plain markdown and YAML.
 - Any agent. No lock-in.
@@ -146,7 +151,7 @@ The full contract is in [docs/spec.md](https://github.com/ionianlabs/brain/blob/
 - History is append-only.
 - Standard markdown links, so it works in Obsidian, VS Code or a browser, and depends on none of them.
 
-## Not in scope
+## Not in scope.
 
 - No app.
 - No hosted sync.
@@ -154,7 +159,7 @@ The full contract is in [docs/spec.md](https://github.com/ionianlabs/brain/blob/
 - No vector search.
 - No accounts.
 
-## Credit
+## Credit.
 
 The format borrows from Google's [Open Knowledge Format v0.2](https://github.com/GoogleCloudPlatform/open-knowledge-format). From it, Brain takes:
 
@@ -163,10 +168,10 @@ The format borrows from Google's [Open Knowledge Format v0.2](https://github.com
 - generated indexes
 - standard links
 
-## Status
+## Status.
 
 v0.1. I am building it, and I use it every day. Expect rough edges and changes to the format before 1.0.
 
-## License
+## License.
 
 MIT. Part of [Ionian Labs](https://ionian.dev).
