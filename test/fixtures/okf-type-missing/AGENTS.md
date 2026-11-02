@@ -1,0 +1,3 @@
+# Rules
+
+No frontmatter here.

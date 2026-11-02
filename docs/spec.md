@@ -1,0 +1,308 @@
+---
+type: guide
+description: Public format and CLI contract for Ionian Brain, the markdown memory shared by all agents
+tags: [spec, format, cli, lint]
+updated: 2026-11-02
+---
+
+# Ionian Brain spec
+
+This document is the contract for the brain format and the `brain` CLI. Templates, the CLI and the tests all implement it. Where this spec and an implementation differ, the spec wins.
+
+## 1. Relation to OKF
+
+A brain is a conformant [Open Knowledge Format](https://github.com/GoogleCloudPlatform/open-knowledge-format) v0.2 bundle.
+
+- OKF requires only a non-empty `type` on every non-reserved `.md` file.
+- `index.md` and `log.md` are reserved names in OKF.
+- OKF defines storage. Brain adds a working lifecycle: a session protocol, a state/history split, org and confidential boundaries, an inbox, example skills, and lint that enforces them.
+- Brain never redefines OKF keys. `status`, if present, keeps OKF's meaning: `draft`, `stable` or `deprecated`.
+- The OKF trust keys `generated`, `verified` and `stale_after` are allowed and preserved.
+- Brain does not use the reserved name `log.md` anywhere. History lives in `logs/<slug>.md`.
+
+## 2. Layout of a brain folder
+
+| Path | Holds |
+|---|---|
+| `AGENTS.md` | The rulebook every agent reads first |
+| `index.md` | OKF reserved index. Brain generates a block in it |
+| `CLAUDE.md`, `.github/copilot-instructions.md` | One-line pointers to `AGENTS.md` |
+| `projects/<slug>.md` | Project state file. A short file per project that says where things stand today |
+| `logs/<slug>.md` | Project history, append-only |
+| `inbox/YYYY-MM-DD-<slug>.md` | Short notes, triaged later |
+| `knowledge/<slug>.md` | Durable reference material |
+| `templates/` | Note templates |
+| `skills/<name>/SKILL.md`, `.github/prompts/<name>.prompt.md` | Example skills (`handover`, `brief`) |
+| `.confidential/` | Off limits to agents unless you point them at a specific note. A dot-folder, so most search tools skip it. Gitignored by default. Lint never reads it |
+
+Slugs use lowercase `a-z`, `0-9` and hyphens only.
+
+## 3. Frontmatter
+
+Frontmatter is YAML between two `---` lines at the very top of the file.
+
+### 3.1 Supported subset
+
+The CLI parser supports this subset and nothing more:
+
+- `key: value` scalars: bare, single-quoted or double-quoted.
+- Inline lists: `[a, b]`.
+- Block lists: lines starting with `- a`.
+- One level of nested mapping, inline `{by: x, at: y}` or indented. This covers OKF `generated: {by, at}`.
+- Comments starting with `#`.
+
+Unknown keys are preserved and ignored.
+
+### 3.2 Required keys
+
+Every `.md` file in the brain, except the reserved `index.md`, carries a non-empty `type`. This includes `AGENTS.md`, `CLAUDE.md`, `README.md`, `SKILL.md` and prompt files. Use `type: guide`, `type: skill` or `type: prompt` for these.
+
+Notes are files under `projects/`, `logs/`, `inbox/` and `knowledge/`. Notes also require:
+
+| Key | Value |
+|---|---|
+| `description` | One line, no trailing full stop. It is copied into the index |
+| `tags` | List |
+| `org` | Slug. `personal` is special |
+| `updated` | `YYYY-MM-DD` |
+
+### 3.3 Note types
+
+| `type` | Folder |
+|---|---|
+| `project` | `projects/` |
+| `log` | `logs/` |
+| `capture` | `inbox/` |
+| `note` | `knowledge/` |
+
+Extra required keys:
+
+- `project` adds `phase` (`active`, `paused` or `done`) and `focus` (one line: what matters now).
+- `log` adds `project` (the slug of its project).
+
+## 4. Project state file body
+
+A project file describes the present state. It never holds history. History goes to the log.
+
+- The first line after frontmatter is `# Title`.
+- Next comes the log link: `History: [log](/logs/<slug>.md)`.
+- Then these sections, in this order:
+  1. `## Now`: current state, a few bullets. It holds the current state and any decision still in force that a reader needs to know. Finished work and the full decision record go to the log.
+  2. `## Open`: checkbox items.
+  3. `## People`: who, role, when to talk to them.
+  4. `## Links`: where the work lives (paths or URLs).
+- Target length is 600 words. Lint warns above 800.
+
+Open item syntax:
+
+```
+- [ ] Text (owner: Name, due: YYYY-MM-DD)
+```
+
+- `owner` and `due` are both optional.
+- `blocked: reason` may be added inside the parentheses, for example `(owner: Sam, due: 2026-11-10, blocked: waiting for review)`.
+- Done items are moved to the log. They are not ticked in place.
+
+## 5. Log body
+
+- The first line after frontmatter is `# <Title> log`.
+- Then `## YYYY-MM-DD` headings, newest first.
+- Under each date, bullets: decisions (prefix `Decision:`), done items (prefix `Done:`), and earlier state.
+- Agents add entries at the top, under today's date. If today's heading exists, add under it.
+- Existing entries are never edited or deleted.
+
+## 6. Inbox
+
+- Anyone may add a new capture file named `inbox/YYYY-MM-DD-<slug>.md`.
+- Frontmatter has `type: capture`. `org` may be `unknown` until triage. `org: unknown` is allowed only for captures.
+- At the next session, an agent triages each capture:
+  1. Move its content into the right project or knowledge note.
+  2. Add `Triaged capture: <filename>` to that project's log.
+  3. Delete the capture file.
+
+## 7. Links
+
+- Links are standard markdown links.
+- Root-relative links (`/projects/x.md`, resolved from the brain root) are preferred. Relative paths are allowed.
+- Anchors (`#...`) are stripped before resolving.
+- External links (`http`, `https`, `mailto`) are not checked.
+
+## 8. Org boundary
+
+- Every note has an `org`.
+- Orgs other than `personal` are isolated from each other. A note in org A never links to a note in org B. Agents never copy content between them.
+- Links between `personal` and any org are allowed.
+- The generated `index.md` is exempt.
+
+## 9. Confidential
+
+- Agents treat `.confidential/` as off limits unless you point them at a specific note.
+- It is a dot-folder, so most search tools skip it. It is gitignored by default.
+- Non-confidential notes do not link into it.
+- Lint never reads its contents.
+
+## 10. index.md
+
+- Frontmatter is optional. If present it may only contain `okf_version: "0.2"`.
+- Free text above or below the generated block is kept.
+- The generated block sits between these two markers, each on its own line:
+
+```
+<!-- brain:index start -->
+<!-- brain:index end -->
+```
+
+- Inside the block, in this order:
+  - `## Active`, `## Paused`, `## Done`: projects by `phase`. Empty sections are omitted.
+  - `## Knowledge`: notes from `knowledge/`.
+- Each line has this form:
+
+```
+- [Title](/projects/slug.md): description (org, updated YYYY-MM-DD)
+```
+
+- Title is the note's first `# ` heading, else the slug.
+- Lines are sorted by `updated` descending, then by slug ascending.
+- Output is deterministic and has no timestamps. Running `brain index` twice changes nothing.
+- Inbox captures and logs are not listed.
+
+## 11. Lint
+
+Scope: all `.md` files under the brain root, excluding `.git/`, `node_modules/` and `.confidential/`.
+
+Brain-specific checks (everything except `okf/type-missing`) apply only to notes in `projects/`, `logs/`, `inbox/` and `knowledge/`.
+
+| Rule | Severity | Fires when |
+|---|---|---|
+| `okf/type-missing` | error | a non-reserved `.md` has no parseable frontmatter or an empty `type` |
+| `frontmatter/missing-key` | error | a required key for that note type is missing or empty |
+| `frontmatter/bad-value` | error | `updated` is not a valid `YYYY-MM-DD`; `phase` is not `active`, `paused` or `done`; `type` does not match the folder; `stale_after` is not ISO 8601 with a UTC offset; `status` is not `draft`, `stable` or `deprecated` |
+| `links/broken` | warning | a local link target does not exist |
+| `tags/near-duplicate` | warning | two distinct tags normalize to the same string (lowercase; `_` and spaces to `-`; trailing `s` dropped) or differ by one edit when both are 5 or more characters |
+| `state/over-budget` | warning | a project file body exceeds 800 words |
+| `state/stale` | warning | `phase: active` and `updated` is older than 14 days (`--stale-days N`), or `stale_after` is in the past |
+| `org/cross-link` | error | a note links to a note in a different org and neither org is `personal` |
+| `confidential/linked` | warning | a note links into `.confidential/` |
+| `index/out-of-date` | warning | `index.md` is missing, has no markers, or its block differs from what `brain index` would write |
+
+### 11.1 Output
+
+- Text: one line per finding, then a summary line.
+
+```
+path:line  severity  rule  message
+```
+
+- `path` is relative to the brain root. `line` is 1 if the finding is not line-specific. Fields are separated by two spaces.
+- `message` says what is wrong and, where a fix is obvious, how to fix it. Paths inside messages use the root-relative form with a leading `/`, the same as links.
+- Fix hints for these rules:
+  - `org/cross-link`: "Remove the link, or put the shared fact in a personal note and link that."
+  - `links/broken`: "Create it from templates/log.md." when the target is `/logs/<slug>.md` and `projects/<slug>.md` exists. Otherwise "Fix the path or remove the link."
+  - `index/out-of-date`: "Run `brain index` to update it."
+  - The other rules end their message with a short hint, for example "Add it to the frontmatter."
+- `--json` prints one JSON object:
+
+```
+{"findings":[{"path","line","severity","rule","message"}],"errors":N,"warnings":N}
+```
+
+### 11.2 Exit codes
+
+| Code | Meaning |
+|---|---|
+| 0 | No errors (warnings allowed) |
+| 1 | One or more errors |
+| 2 | Usage error |
+
+Lint never writes files.
+
+## 12. CLI
+
+Package `@ionianlabs/brain`, bin `brain`, Node 20 or newer, zero runtime dependencies.
+
+### `brain init [dir]`
+
+- Default `dir` is `~/brain`.
+- Copies the template into `dir`.
+- Never overwrites an existing file. It lists the skipped files.
+- Replaces `{{BRAIN_DIR}}` with the absolute brain path in files under `skills/` and `.github/prompts/`.
+- `--example` also copies the fictional sample notes.
+- `--link-skills` symlinks each `<dir>/skills/<name>` into `~/.claude/skills/<name>`. It skips existing names and reports them.
+- Runs `index` at the end.
+- Prints three next steps:
+  1. Open the folder in your editor.
+  2. Start your agent there and ask for the brief.
+  3. At session end, ask for a handover.
+
+### `brain index [dir]`
+
+- Default `dir` is `.`.
+- Writes the generated block. Creates `index.md` if missing.
+- `--check` writes nothing and exits 1 if the index is out of date.
+
+### `brain lint [dir]`
+
+- Default `dir` is `.`.
+- Flags: `--json`, `--stale-days N`, `--today YYYY-MM-DD` (treat the date as today, for tests and reproducible runs).
+
+### Other
+
+- `brain --help` prints the global usage and `brain --version` prints the version. Both go to stdout and exit 0.
+- `brain init --help`, `brain index --help` and `brain lint --help` print usage for that command to stdout: its arguments, flags and one example. They exit 0.
+- A usage error (unknown command, unknown option, bad value, missing directory) prints the error and one line, ``Run `brain <command> --help` for usage.``, to stderr and exits 2. It does not print the usage block. Without a known command the line points to `brain --help`.
+
+## 13. Session protocol (for AGENTS.md)
+
+- Start: read `AGENTS.md`, then `index.md`, then the state file of the project at hand. Check `inbox/`.
+- During: stay inside the project's org.
+- End (handover):
+  1. Update the state file so it describes the present state.
+  2. Move done items and decisions to the top of the log, under today's date.
+  3. Set `updated`.
+  4. Rebuild the index.
+  5. Run lint.
+
+## 14. Example skills
+
+Skills are prompts any agent can run. They show usage. They are not the product.
+
+### `brief`
+
+Read `index.md`, the active and paused project files, and `inbox/`. Report:
+
+- Overdue items (due before today).
+- Items due in the next 7 days.
+- Blocked items.
+- Who to talk to: the owners of overdue, due-soon and blocked items, plus People whose entry says when to talk to them.
+- What changed: notes with `updated` in the last 7 days.
+- Inbox captures waiting.
+- Lint warnings.
+
+Group the report by org, `personal` last. End each org with one final line, `No due date: N open items`, which counts the org's open items that have no `due`.
+
+Never edit anything.
+
+### `handover`
+
+End a work session for one project. Update its state file, prepend log entries, set `updated`, run `npx @ionianlabs/brain index` and `npx @ionianlabs/brain lint`, then report what changed.
+
+## Open points
+
+Gaps filled conservatively. Builders follow these until the spec changes.
+
+1. `--help` and `--version` print to stdout and exit 0.
+2. `index` lists only projects and knowledge notes. Logs and captures are left out.
+3. In the index, ties on `updated` sort by slug ascending. The slug is the filename without `.md`.
+4. Index sections appear in the order Active, Paused, Done, Knowledge. A `Knowledge` section with no notes is omitted.
+5. If `index.md` has no markers, `brain index` appends the block at the end and keeps existing content. If it has no file, it creates one with `type`-free, `okf_version: "0.2"` frontmatter, a `# Index` heading and the block.
+6. `state/over-budget` counts whitespace-separated words in the body, after frontmatter.
+7. `state/stale` compares dates by whole days against the local date; `updated` exactly 14 days old is not stale.
+8. `links/broken` and `org/cross-link` check links to `.md` files and other local paths. A link that resolves outside the brain root counts as broken.
+9. `type` mismatch with folder (`frontmatter/bad-value`) applies to the four note folders only.
+10. `brain lint` and `brain index` on a missing directory exit 2.
+11. `org/cross-link` is reported on the linking note, at the line of the link. Links to files with no `org` are ignored.
+12. `tags/near-duplicate` compares tags within one file. It does not compare across files.
+13. `confidential/linked` fires on any link whose resolved path is inside `.confidential/`. Such links are not also reported as `links/broken`.
+14. Files under `templates/` are checked for `type` only, not as notes. Template placeholders must still carry a non-empty `type`.
+15. `brain init` creates `.gitignore` with `.confidential/` as part of the template.
+16. The Open item parser reads only lines under `## Open` that start with `- [ ]`.

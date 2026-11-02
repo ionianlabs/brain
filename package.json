@@ -1,0 +1,38 @@
+{
+  "name": "@ionianlabs/brain",
+  "version": "0.1.0",
+  "description": "An open-source markdown memory for coding agents: a folder format, a session protocol, and a small CLI to init, index and lint it.",
+  "type": "module",
+  "bin": {
+    "brain": "bin/brain.mjs"
+  },
+  "files": [
+    "bin",
+    "src",
+    "template",
+    "examples",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "github:ionianlabs/brain"
+  },
+  "keywords": [
+    "agents",
+    "memory",
+    "markdown",
+    "okf",
+    "claude-code",
+    "copilot",
+    "cli"
+  ],
+  "scripts": {
+    "test": "node --test",
+    "build:template": "node scripts/build-template-repo.mjs"
+  }
+}
