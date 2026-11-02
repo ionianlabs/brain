@@ -8,21 +8,29 @@ Every agent chat starts at zero. The context lives in your head, in old chats an
 
 ## Quickstart
 
+Add the plugin to your agent. It brings the `brief` and `handover` skills to every repo, and tells each new session where your brain is.
+
+| Agent | Install | Run |
+|---|---|---|
+| Claude Code | `/plugin marketplace add ionianlabs/brain`, then `/plugin install brain@ionianlabs` | `/brain:brief` |
+| Copilot CLI | `copilot plugin marketplace add ionianlabs/brain`, then `copilot plugin install brain@ionianlabs` | `/brief` |
+| Copilot in VS Code | Add `ionianlabs/brain` to `chat.plugins.marketplaces`, then install `brain` from **Chat: Plugins** | `/brain:brief` |
+
+Then say "brief". With no brain yet, the agent offers to create one in `~/brain`. The plugin carries the CLI, so there is nothing else to install. Ask for the sample projects if you want to look around first.
+
+Without the plugin, or for any other agent, clone the repo and run the CLI from it:
+
 ```sh
-npx @ionianlabs/brain init --link-skills            # creates ~/brain
-npx @ionianlabs/brain init --link-skills --example  # same, with sample projects
+git clone https://github.com/ionianlabs/brain
+node brain/bin/brain.mjs init            # creates ~/brain
+node brain/bin/brain.mjs init --example  # same, with sample projects
 ```
 
-`--link-skills` is for Claude Code. It links the `brief` and `handover` skills into `~/.claude/skills/`, so they work from any repo. Leave it out for other agents.
+Then open your agent in `~/brain` and say "brief", or "Read skills/brief/SKILL.md and follow it."
 
-1. Open your agent in the `~/brain` folder and say "brief".
-2. Work. At the end of a session, say "handover".
+At the end of a session, say "handover".
 
-How the agent picks up "brief" and "handover":
-
-- Claude Code: skills, matched by description.
-- Copilot: the `/brief` and `/handover` prompt files.
-- Any other agent: "Read skills/brief/SKILL.md and follow it."
+Details, updates and the routes without the plugin are in [The Brain plugin](https://github.com/ionianlabs/brain/blob/main/docs/plugin.md). For a brain outside `~/brain`, set `BRAIN_DIR`.
 
 Node 20 or newer is the only requirement. If you want no tooling at all, click "Use this template" on [`ionianlabs/brain-template`](https://github.com/ionianlabs/brain-template) and clone it.
 
@@ -92,7 +100,7 @@ Each org ends with one line, "No due date: N open items".
 
 | Addition | What it does | Why |
 |---|---|---|
-| **Session protocol** | One `AGENTS.md`: read at start, write at end. | Works with any agent, no plugin. OKF has no write workflow. |
+| **Session protocol** | One `AGENTS.md`: read at start, write at end. | Works with any agent. The plugin is optional. OKF has no write workflow. |
 | **State and history split** | A short current file per project (about 600 words) plus an append-only log. | Reads stay cheap and nothing is lost. |
 | **Boundaries** | An `org` key keeps clients apart. `.confidential/` holds notes agents leave alone. | Safe across several clients. OKF has no access control. |
 | **Capture path** | `inbox/`, triaged at the next session. | Aimed at the real bottleneck, which is writing. |
@@ -103,13 +111,15 @@ A brain stays a valid OKF v0.2 bundle, so any OKF tool can read it.
 
 ## Works with
 
-- **Claude Code.** A `CLAUDE.md` pointer and the `brief` and `handover` skills. With `init --link-skills` the skills are symlinked into `~/.claude/skills/`, so they are available in every project, not only inside the brain folder. Existing skills with the same name are left alone.
-- **GitHub Copilot.** `.github/copilot-instructions.md` and two prompt files, `/brief` and `/handover`. See [docs/copilot.md](https://github.com/ionianlabs/brain/blob/main/docs/copilot.md) to use them from inside a work repo.
+- **Claude Code.** The plugin, or a `CLAUDE.md` pointer and the `brief` and `handover` skills in the brain folder. Without the plugin, `init --link-skills` symlinks the skills into `~/.claude/skills/`, so they work in every project. Existing skills with the same name are left alone.
+- **GitHub Copilot.** The plugin, in Copilot CLI and in VS Code. Without it, `.github/copilot-instructions.md` and two prompt files, `/brief` and `/handover`. See [docs/copilot.md](https://github.com/ionianlabs/brain/blob/main/docs/copilot.md) to use them from inside a work repo.
 - **Any agent that can read a file.** Point it at `AGENTS.md`.
 
 ## CLI
 
 Three commands. The CLI only keeps the folder in shape. It never talks to a model.
+
+Run it from a clone as `node bin/brain.mjs <command>`. Below, `brain` stands for that. With the plugin, the agent gets the exact command at the start of each session.
 
 ```sh
 brain init [dir]     # copy the template into dir (default ~/brain), never overwrite

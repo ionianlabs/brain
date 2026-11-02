@@ -31,7 +31,7 @@ export function makeTemplate(root) {
     'AGENTS.md': '---\ntype: guide\n---\n\n# Rules\n\nBrain lives at {{BRAIN_DIR}}.\n',
     'gitignore': '.confidential/\n',
     'index.md': '---\nokf_version: "0.2"\n---\n\n# Index\n\n<!-- brain:index start -->\n<!-- brain:index end -->\n',
-    'skills/handover/SKILL.md': '---\ntype: skill\n---\n\nRun in {{BRAIN_DIR}}.\n',
+    'skills/handover/SKILL.md': '---\ntype: skill\n---\n\nRun in {{BRAIN_DIR}} with {{BRAIN_CLI}}.\n',
     '.github/prompts/brief.prompt.md': '---\ntype: prompt\n---\n\nRead {{BRAIN_DIR}}/index.md.\n',
   });
   return root;

@@ -6,20 +6,26 @@ description: End a working session for one project. Use when the user says "hand
 
 # Handover
 
-End a working session for one project. Update its state file, prepend log entries, then check the brain. You may be running inside a work repo, not the brain folder. The brain is at `{{BRAIN_DIR}}`.
+End a working session for one project. Update its state file, prepend log entries, then check the brain. You may be running inside a work repo, not the brain folder.
+
+Find the brain first. Use the brain folder named in your session context, if there is one. Otherwise use the `BRAIN_DIR` environment variable if it is set, otherwise `{{BRAIN_DIR}}`. Below, `<brain>` is that folder.
+
+Find the brain CLI the same way. Use the command named in your session context, if there is one. Otherwise use {{BRAIN_CLI}}. Below, `<cli>` is that command.
+
+If `<brain>/AGENTS.md` does not exist, say that no brain was found there and offer to create one with `<cli> init "<brain>"`. Then stop.
 
 ## Steps
 
-1. Find the project. Compare the current repo or folder name with the slugs in `{{BRAIN_DIR}}/projects/` and with each project's `## Links` section. If the match is not clear, ask the user to pick from a short list of candidates.
-2. Read `{{BRAIN_DIR}}/AGENTS.md` and the project file `{{BRAIN_DIR}}/projects/<slug>.md`.
+1. Find the project. Compare the current repo or folder name with the slugs in `<brain>/projects/` and with each project's `## Links` section. If the match is not clear, ask the user to pick from a short list of candidates.
+2. Read `<brain>/AGENTS.md` and the project file `<brain>/projects/<slug>.md`.
 3. Update `## Now` and `## Open` so the file describes the present state. Keep the file under about 600 words.
    - Rewrite `## Now` as a few bullets about where things stand. `## Now` holds the current state and any decision still in force that a reader needs to know. Finished work and the full decision record go to the log.
    - Add new open items as `- [ ] Text (owner: Name, due: YYYY-MM-DD)`. Owner and due are optional. Add `blocked: reason` inside the parentheses if needed.
    - Remove finished items from `## Open`. Do not tick them.
    - Update `focus` in the frontmatter if what matters now has changed.
-4. Open `{{BRAIN_DIR}}/logs/<slug>.md`. Under today's `## YYYY-MM-DD` heading, add entries at the top. Create the heading if it does not exist, directly below the `# <Title> log` line. Use the prefixes `Decision:` and `Done:`. Never edit or delete older entries.
+4. Open `<brain>/logs/<slug>.md`. Under today's `## YYYY-MM-DD` heading, add entries at the top. Create the heading if it does not exist, directly below the `# <Title> log` line. Use the prefixes `Decision:` and `Done:`. Never edit or delete older entries.
 5. Set `updated` to today's date in the project file and in the log file.
-6. Run `npx @ionianlabs/brain index {{BRAIN_DIR}}`, then `npx @ionianlabs/brain lint {{BRAIN_DIR}}`. Fix any errors you caused. If Node is not available, say so and skip both.
+6. Run `<cli> index <brain>`, then `<cli> lint <brain>`. Fix any errors you caused. If the CLI does not run, say so and skip both.
 7. Report a short summary of what changed: the files touched, the log entries added and the open items added or removed.
 
 ## Rules

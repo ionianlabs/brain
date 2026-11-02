@@ -10,15 +10,21 @@ tools: ['search/codebase', 'execute/runInTerminal']
 
 Give a short, read-only briefing of the brain. Never edit, create, move or delete anything.
 
+Find the brain first. Use the brain folder named in your session context, if there is one. Otherwise use the `BRAIN_DIR` environment variable if it is set, otherwise `{{BRAIN_DIR}}`. Below, `<brain>` is that folder.
+
+Find the brain CLI the same way. Use the command named in your session context, if there is one. Otherwise use {{BRAIN_CLI}}. Below, `<cli>` is that command.
+
+If `<brain>/AGENTS.md` does not exist, say that no brain was found there and offer to create one with `<cli> init "<brain>"`. Then stop.
+
 ## Steps
 
-1. Read `{{BRAIN_DIR}}/AGENTS.md`, then `{{BRAIN_DIR}}/index.md`.
-2. Read every project file in `{{BRAIN_DIR}}/projects/` whose `phase` is `active` or `paused`. Skip `done`.
-3. List `{{BRAIN_DIR}}/inbox/` and read each capture.
+1. Read `<brain>/AGENTS.md`, then `<brain>/index.md`.
+2. Read every project file in `<brain>/projects/` whose `phase` is `active` or `paused`. Skip `done`.
+3. List `<brain>/inbox/` and read each capture. If you cannot list the folder, say so in the report. Do not write "none".
 4. Never open `.confidential/`, even if a note mentions it.
 5. Parse the open items. Read only the lines under `## Open` that start with `- [ ]`. The format is `- [ ] Text (owner: Name, due: YYYY-MM-DD, blocked: reason)`. All three parts are optional.
 6. Take today's date from the system. Compare dates by whole days.
-7. Run `npx @ionianlabs/brain lint {{BRAIN_DIR}}` and read the output. If Node or npx is not available, write "Hygiene skipped: Node is not available" and move on.
+7. Run `<cli> lint <brain>` and read the output. If the CLI does not run, write "Hygiene skipped: the brain CLI did not run" and move on.
 
 ## Report
 

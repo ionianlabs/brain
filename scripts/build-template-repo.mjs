@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 // Build dist/template-repo/ from template/, for a GitHub "Use this template" repo.
 // Renames gitignore to .gitignore, replaces {{BRAIN_DIR}} with ~/brain and
+// {{BRAIN_CLI}} with how to run the CLI from a clone, and
 // adds a .gitkeep to each empty note folder. Nothing else is added.
 
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { FROM_CLONE } from '../src/init.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const NOTE_DIRS = ['projects', 'logs', 'inbox', 'knowledge'];
@@ -18,7 +20,7 @@ function copyTree(src, dest) {
       copyTree(from, path.join(dest, e.name));
     } else if (e.isFile()) {
       const name = e.name === 'gitignore' && src === ROOT_TEMPLATE ? '.gitignore' : e.name;
-      const data = fs.readFileSync(from).toString('utf8').split('{{BRAIN_DIR}}').join('~/brain');
+      const data = fs.readFileSync(from).toString('utf8').split('{{BRAIN_DIR}}').join('~/brain').split('{{BRAIN_CLI}}').join(FROM_CLONE);
       fs.writeFileSync(path.join(dest, name), data);
     }
   }

@@ -30,9 +30,11 @@ Copy a file from `templates/` to start a note.
 ## Check your work
 
 ```
-npx @ionianlabs/brain index
-npx @ionianlabs/brain lint
+brain index
+brain lint
 ```
+
+`brain` is the Ionian Brain CLI. Run it as `node bin/brain.mjs` in a clone of `https://github.com/ionianlabs/brain`.
 
 ## Format
 

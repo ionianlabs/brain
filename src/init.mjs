@@ -13,6 +13,15 @@ export const EXAMPLE_BASE_DATE = '2026-11-02';
 const EMPTY_DIRS = ['projects', 'logs', 'inbox', 'knowledge', '.confidential'];
 const EXAMPLE_DIRS = ['projects', 'logs', 'inbox', 'knowledge'];
 const SUBSTITUTE_IN = ['skills/', '.github/prompts/'];
+// How the skills in a new brain run this CLI: the copy init runs from. The copy
+// inside the plugin moves with every plugin update, so a brain created from it
+// points at a clone instead. Plugin sessions get the current command anyway.
+export const FROM_CLONE = '`node bin/brain.mjs` in a clone of `https://github.com/ionianlabs/brain`';
+
+export function cliCommand(packageRoot = PACKAGE_ROOT) {
+  const inPlugin = path.basename(packageRoot) === 'cli' && fs.existsSync(path.join(packageRoot, '..', '.claude-plugin', 'plugin.json'));
+  return inPlugin ? FROM_CLONE : `\`node "${path.join(packageRoot, 'bin', 'brain.mjs')}"\``;
+}
 
 export function resolveHome(options = {}) {
   return options.home || process.env.BRAIN_HOME || os.homedir();
@@ -65,7 +74,7 @@ export function init(options = {}) {
     const destRel = rel === 'gitignore' ? '.gitignore' : rel;
     let data = fs.readFileSync(path.join(templateDir, rel));
     if (SUBSTITUTE_IN.some((p) => destRel.startsWith(p))) {
-      data = data.toString('utf8').split('{{BRAIN_DIR}}').join(dir);
+      data = data.toString('utf8').split('{{BRAIN_DIR}}').join(dir).split('{{BRAIN_CLI}}').join(cliCommand());
     }
     put(destRel, data);
   }

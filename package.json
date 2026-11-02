@@ -1,6 +1,7 @@
 {
   "name": "@ionianlabs/brain",
   "version": "0.1.0",
+  "private": true,
   "description": "An open-source markdown memory for coding agents: a folder format, a session protocol, and a small CLI to init, index and lint it.",
   "type": "module",
   "bin": {
@@ -27,9 +28,6 @@
   "bugs": {
     "url": "https://github.com/ionianlabs/brain/issues"
   },
-  "publishConfig": {
-    "access": "public"
-  },
   "keywords": [
     "agents",
     "memory",
@@ -41,6 +39,7 @@
   ],
   "scripts": {
     "test": "node --test",
-    "build:template": "node scripts/build-template-repo.mjs"
+    "build:template": "node scripts/build-template-repo.mjs",
+    "build:plugin": "node scripts/build-plugin.mjs"
   }
 }

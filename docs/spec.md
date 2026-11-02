@@ -218,14 +218,14 @@ Lint never writes files.
 
 ## 12. CLI
 
-Package `@ionianlabs/brain`, bin `brain`, Node 20 or newer, zero runtime dependencies.
+Bin `brain`, Node 20 or newer, zero runtime dependencies. It ships in the repo: run it from a clone as `node bin/brain.mjs`. The plugin carries a copy in `plugin/cli/`.
 
 ### `brain init [dir]`
 
 - Default `dir` is `~/brain`.
 - Copies the template into `dir`.
 - Never overwrites an existing file. It lists the skipped files.
-- Replaces `{{BRAIN_DIR}}` with the absolute brain path in files under `skills/` and `.github/prompts/`.
+- Replaces `{{BRAIN_DIR}}` with the absolute brain path, and `{{BRAIN_CLI}}` with the command that runs this copy of the CLI, in files under `skills/` and `.github/prompts/`.
 - `--example` also copies the fictional sample notes.
 - `--link-skills` symlinks each `<dir>/skills/<name>` into `~/.claude/skills/<name>`. It skips existing names and reports them.
 - Runs `index` at the end.
@@ -284,7 +284,13 @@ Never edit anything.
 
 ### `handover`
 
-End a work session for one project. Update its state file, prepend log entries, set `updated`, run `npx @ionianlabs/brain index` and `npx @ionianlabs/brain lint`, then report what changed.
+End a work session for one project. Update its state file, prepend log entries, set `updated`, run `brain index` and `brain lint`, then report what changed.
+
+### Plugin
+
+`plugin/` packages the skills for Claude Code, GitHub Copilot CLI and Copilot in VS Code, in the Claude Code plugin format that all three read. `.claude-plugin/marketplace.json` at the repo root lists it. `node scripts/build-plugin.mjs` generates `plugin/skills/`, `plugin/cli/` and `plugin/.claude-plugin/plugin.json` from `template/skills/`, the CLI and `package.json`. `--check` exits 1 if they are out of date.
+
+A SessionStart hook states the brain path and the CLI command. It never reads note contents. Skills find the brain in this order: the folder named in the session context, `BRAIN_DIR`, `~/brain`.
 
 ## Open points
 

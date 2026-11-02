@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { init } from '../src/init.mjs';
 import { lint } from '../src/lint.mjs';
-import { makeTemplate, makeExample, tmpDir } from './helpers.mjs';
+import { HERE, makeTemplate, makeExample, tmpDir } from './helpers.mjs';
 
 function setup() {
   const root = tmpDir();
@@ -40,7 +40,7 @@ test('never overwrites an existing file and reports it as skipped', () => {
 test('substitutes {{BRAIN_DIR}} only in skills/ and .github/prompts/', () => {
   const s = setup();
   init(s);
-  assert.ok(read(s.dir, 'skills/handover/SKILL.md').includes(`Run in ${s.dir}.`));
+  assert.ok(read(s.dir, 'skills/handover/SKILL.md').includes(`Run in ${s.dir} with \`node "${path.join(HERE, '..', 'bin', 'brain.mjs')}"\`.`));
   assert.ok(read(s.dir, '.github/prompts/brief.prompt.md').includes(`Read ${s.dir}/index.md.`));
   assert.ok(read(s.dir, 'AGENTS.md').includes('{{BRAIN_DIR}}'));
 });

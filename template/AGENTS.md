@@ -47,8 +47,8 @@ Slugs use lowercase `a-z`, `0-9` and hyphens only.
 1. Update the project's state file so it describes the present.
 2. Move done items and decisions to the top of the log, under today's date.
 3. Set `updated` to today in every file you changed.
-4. Rebuild the index: `npx @ionianlabs/brain index`.
-5. Run lint: `npx @ionianlabs/brain lint`. Fix every error.
+4. Rebuild the index: `brain index`.
+5. Run lint: `brain lint`. Fix every error.
 6. Tell the user what changed.
 
 ## Frontmatter
@@ -107,7 +107,7 @@ Open items sit under `## Open` in the project file:
 1. Pick a slug: lowercase `a-z`, `0-9` and hyphens.
 2. Copy `templates/project.md` to `projects/<slug>.md` and `templates/log.md` to `logs/<slug>.md`.
 3. Fill in the frontmatter and the title in both. Use the same `org` in both, and set `project: <slug>` in the log.
-4. Run `npx @ionianlabs/brain index`, then lint.
+4. Run `brain index`, then lint.
 
 ## Org boundary
 
@@ -135,15 +135,17 @@ If you cannot tell where it belongs, ask the user. Do not guess an org.
 
 ## Index
 
-`index.md` holds a generated block between `<!-- brain:index start -->` and `<!-- brain:index end -->`. Never edit it by hand. Run `npx @ionianlabs/brain index`. Text outside the markers is yours to edit.
+`index.md` holds a generated block between `<!-- brain:index start -->` and `<!-- brain:index end -->`. Never edit it by hand. Run `brain index`. Text outside the markers is yours to edit.
 
 ## Tools
 
+`brain` is the Ionian Brain CLI. With the plugin, your session context names the exact command. Otherwise run `node bin/brain.mjs` in a clone of `https://github.com/ionianlabs/brain`. If it does not run, skip these steps and tell the user.
+
 | Command | Does |
 |---|---|
-| `npx @ionianlabs/brain index` | Rebuilds the index block |
-| `npx @ionianlabs/brain index --check` | Exits 1 if the index is out of date. Writes nothing |
-| `npx @ionianlabs/brain lint` | Checks frontmatter, links, org boundary, size and staleness. Writes nothing |
+| `brain index` | Rebuilds the index block |
+| `brain index --check` | Exits 1 if the index is out of date. Writes nothing |
+| `brain lint` | Checks frontmatter, links, org boundary, size and staleness. Writes nothing |
 
 Lint exits 1 on errors. Warnings are allowed, but read them.
 

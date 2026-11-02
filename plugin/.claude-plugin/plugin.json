@@ -1,0 +1,20 @@
+{
+  "name": "brain",
+  "displayName": "Ionian Brain",
+  "version": "0.1.0",
+  "description": "One memory for all agents, in plain markdown. Brief and handover skills, plus a session-start pointer to your brain folder.",
+  "author": {
+    "name": "Ionian Labs",
+    "url": "https://ionian.dev"
+  },
+  "homepage": "https://github.com/ionianlabs/brain",
+  "repository": "https://github.com/ionianlabs/brain",
+  "license": "MIT",
+  "keywords": [
+    "memory",
+    "markdown",
+    "agents",
+    "brief",
+    "handover"
+  ]
+}
