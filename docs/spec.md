@@ -24,9 +24,8 @@ A brain is a conformant [Open Knowledge Format](https://github.com/GoogleCloudPl
 
 | Path | Holds |
 |---|---|
-| `AGENTS.md` | The rulebook every agent reads first |
+| `AGENTS.md` | The rulebook every agent reads first. Claude Code and GitHub Copilot read it natively |
 | `index.md` | OKF reserved index. Brain generates a block in it |
-| `CLAUDE.md`, `.github/copilot-instructions.md` | One-line pointers to `AGENTS.md` |
 | `projects/<slug>.md` | Project state file. A short file per project that says where things stand today |
 | `logs/<slug>.md` | Project history, append-only |
 | `inbox/YYYY-MM-DD-<slug>.md` | Short notes, triaged later |
@@ -55,7 +54,7 @@ Unknown keys are preserved and ignored.
 
 ### 3.2 Required keys
 
-Every `.md` file in the brain, except the reserved `index.md`, carries a non-empty `type`. This includes `AGENTS.md`, `CLAUDE.md`, `README.md`, `SKILL.md` and prompt files. Use `type: guide`, `type: skill` or `type: prompt` for these.
+Every `.md` file in the brain, except the reserved `index.md`, carries a non-empty `type`. This includes `AGENTS.md`, `README.md`, `SKILL.md` and prompt files. Use `type: guide`, `type: skill` or `type: prompt` for these.
 
 Notes are files under `projects/`, `logs/`, `inbox/` and `knowledge/`. Notes also require:
 

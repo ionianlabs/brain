@@ -133,3 +133,12 @@ test('fails clearly when the template folder is missing', () => {
   const s = setup();
   assert.throws(() => init({ ...s, templateDir: path.join(s.dir, 'nope') }), /template folder not found/);
 });
+
+test('the shipped template has AGENTS.md as its only agent instruction file', () => {
+  const s = setup();
+  init({ dir: s.dir, home: s.home });
+  assert.ok(fs.existsSync(path.join(s.dir, 'AGENTS.md')));
+  assert.ok(!fs.existsSync(path.join(s.dir, 'CLAUDE.md')));
+  assert.ok(!fs.existsSync(path.join(s.dir, '.github', 'copilot-instructions.md')));
+  assert.ok(fs.existsSync(path.join(s.dir, '.github', 'prompts', 'brief.prompt.md')));
+});

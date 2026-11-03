@@ -64,7 +64,7 @@ Brain also works next to Ionian Harness. See [Works with Ionian Harness](https:/
   .confidential/   notes agents leave alone (gitignored)
 ```
 
-`CLAUDE.md` and `.github/copilot-instructions.md` are one-line pointers to `AGENTS.md`.
+`AGENTS.md` is the only agent instruction file. Claude Code and GitHub Copilot both read it natively, so no pointer files are needed.
 
 ## How it works.
 
@@ -118,8 +118,8 @@ A brain stays a valid OKF v0.2 bundle, so any OKF tool can read it.
 
 ## Where it works.
 
-- **Claude Code.** The plugin, or a `CLAUDE.md` pointer and the `brief` and `handover` skills in the brain folder. Without the plugin, `init --link-skills` symlinks the skills into `~/.claude/skills/`, so they work in every project. Existing skills with the same name are left alone.
-- **GitHub Copilot.** The plugin, in Copilot CLI and in VS Code. Without it, `.github/copilot-instructions.md` and two prompt files, `/brief` and `/handover`. See [docs/copilot.md](https://github.com/ionianlabs/brain/blob/main/docs/copilot.md) to use them from inside a work repo.
+- **Claude Code.** The plugin, or `AGENTS.md` (read natively) and the `brief` and `handover` skills in the brain folder. Without the plugin, `init --link-skills` symlinks the skills into `~/.claude/skills/`, so they work in every project. Existing skills with the same name are left alone.
+- **GitHub Copilot.** The plugin, in Copilot CLI and in VS Code. Without it, `AGENTS.md` (read natively) and two prompt files, `/brief` and `/handover`. See [docs/copilot.md](https://github.com/ionianlabs/brain/blob/main/docs/copilot.md) to use them from inside a work repo.
 - **Any agent that can read a file.** Point it at `AGENTS.md`.
 
 ## CLI.
