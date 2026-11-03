@@ -39,7 +39,6 @@
   ],
   "scripts": {
     "test": "node --test",
-    "build:template": "node scripts/build-template-repo.mjs",
     "build:plugin": "node scripts/build-plugin.mjs"
   }
 }

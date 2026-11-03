@@ -37,7 +37,7 @@ At the end of a session, say "handover".
 
 Details, updates and the routes without the plugin are in [The Brain plugin](https://github.com/ionianlabs/brain/blob/main/docs/plugin.md). For a brain outside `~/brain`, set `BRAIN_DIR`.
 
-Node 20 or newer is the only requirement. If you want no tooling at all, click "Use this template" on [`ionianlabs/brain-template`](https://github.com/ionianlabs/brain-template) and clone it.
+Node 20 or newer is the only requirement.
 
 ### Add your own project.
 
