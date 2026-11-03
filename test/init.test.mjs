@@ -114,10 +114,19 @@ test('link-skills symlinks into a fake home and skips existing names', () => {
   assert.deepEqual(again.linkSkipped, [link]);
 });
 
-test('default dir is <home>/brain', () => {
+test('default dir is <home>/Ionian/brain', () => {
   const s = setup();
-  const r = init({ templateDir: s.templateDir, home: s.home });
-  assert.equal(r.dir, path.join(s.home, 'brain'));
+  const r = init({ templateDir: s.templateDir, home: s.home, env: {} });
+  assert.equal(r.dir, path.join(s.home, 'Ionian', 'brain'));
+});
+
+test('default dir order: BRAIN_DIR, $IONIAN_HOME/brain, <home>/Ionian/brain, never <home>/brain', () => {
+  const s = setup();
+  fs.mkdirSync(path.join(s.home, 'brain'), { recursive: true });
+  const at = (env) => init({ templateDir: s.templateDir, home: s.home, env }).dir;
+  assert.equal(at({ BRAIN_DIR: path.join(s.home, 'b1'), IONIAN_HOME: path.join(s.home, 'ih') }), path.join(s.home, 'b1'));
+  assert.equal(at({ IONIAN_HOME: path.join(s.home, 'ih') }), path.join(s.home, 'ih', 'brain'));
+  assert.notEqual(at({}), path.join(s.home, 'brain'));
 });
 
 test('fails clearly when the template folder is missing', () => {

@@ -11,11 +11,16 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export function brainDir(env = process.env, home = os.homedir()) {
-  const raw = (env.BRAIN_DIR || '').trim();
-  if (!raw) return path.join(home, 'brain');
-  if (raw === '~') return home;
-  if (raw.startsWith('~/') || raw.startsWith('~\\')) return path.join(home, raw.slice(2));
-  return path.resolve(raw);
+  const expandHome = (raw) => {
+    if (raw === '~') return home;
+    if (raw.startsWith('~/') || raw.startsWith('~\\')) return path.join(home, raw.slice(2));
+    return path.resolve(raw);
+  };
+  const explicit = (env.BRAIN_DIR || '').trim();
+  if (explicit) return expandHome(explicit);
+  const ionian = (env.IONIAN_HOME || '').trim();
+  if (ionian) return path.join(expandHome(ionian), 'brain');
+  return path.join(home, 'Ionian', 'brain');
 }
 
 // The CLI bundled with the plugin, found from this script's own location.
@@ -32,7 +37,7 @@ export function context(dir, cli = CLI) {
   return (
     `Ionian Brain is installed, but no brain folder was found at ${dir}. ` +
     `If the user asks for a brief or a handover, offer to create one with: ${cli} init "${dir}". ` +
-    `The BRAIN_DIR environment variable sets another folder. ${run}`
+    `The BRAIN_DIR environment variable sets another folder, and IONIAN_HOME moves the shared Ionian home. ${run}`
   );
 }
 

@@ -17,7 +17,7 @@ test('plugin/ is in sync with template/skills and package.json', () => {
   assert.deepEqual(buildPlugin({ rootDir: ROOT, check: true }), [], 'run npm run build:plugin');
 });
 
-test('builds plugin skills with ~/brain and without the type key', () => {
+test('builds plugin skills with ~/Ionian/brain and without the type key', () => {
   const root = tmpDir();
   writeTree(root, {
     'package.json': '{"version":"9.9.9","license":"MIT"}',
@@ -31,7 +31,7 @@ test('builds plugin skills with ~/brain and without the type key', () => {
   ]);
   buildPlugin({ rootDir: root });
   const skill = fs.readFileSync(path.join(root, 'plugin/skills/demo/SKILL.md'), 'utf8');
-  assert.equal(skill, '---\nname: demo\ndescription: Demo.\n---\n\nRead ~/brain/index.md with `node "<skill>/../../cli/bin/brain.mjs"`, where `<skill>` is the folder that holds this SKILL.md. type: stays in the body.\n');
+  assert.equal(skill, '---\nname: demo\ndescription: Demo.\n---\n\nRead ~/Ionian/brain/index.md with `node "<skill>/../../cli/bin/brain.mjs"`, where `<skill>` is the folder that holds this SKILL.md. type: stays in the body.\n');
   assert.ok(!fs.existsSync(path.join(root, 'plugin/skills/gone/SKILL.md')));
   assert.ok(!fs.existsSync(path.join(root, 'plugin/cli/src/old.mjs')));
   assert.equal(readJson(path.join(root, 'plugin/cli/package.json')).dependencies, undefined);
@@ -77,12 +77,23 @@ test('hooks.json runs the session-start script', () => {
   assert.ok(fs.existsSync(HOOK));
 });
 
-test('brainDir: BRAIN_DIR with ~ expansion, else ~/brain', () => {
-  assert.equal(brainDir({}, '/h'), path.join('/h', 'brain'));
-  assert.equal(brainDir({ BRAIN_DIR: '  ' }, '/h'), path.join('/h', 'brain'));
+test('brainDir: BRAIN_DIR, then $IONIAN_HOME/brain, then ~/Ionian/brain', () => {
+  assert.equal(brainDir({}, '/h'), path.join('/h', 'Ionian', 'brain'));
+  assert.equal(brainDir({ BRAIN_DIR: '  ', IONIAN_HOME: ' ' }, '/h'), path.join('/h', 'Ionian', 'brain'));
+  assert.equal(brainDir({ IONIAN_HOME: '/i/home' }, '/h'), path.join(path.resolve('/i/home'), 'brain'));
+  assert.equal(brainDir({ IONIAN_HOME: '~/ih' }, '/h'), path.join('/h', 'ih', 'brain'));
+  assert.equal(brainDir({ BRAIN_DIR: '/x/y', IONIAN_HOME: '/i/home' }, '/h'), path.resolve('/x/y'));
   assert.equal(brainDir({ BRAIN_DIR: '~' }, '/h'), '/h');
   assert.equal(brainDir({ BRAIN_DIR: '~/notes' }, '/h'), path.join('/h', 'notes'));
   assert.equal(brainDir({ BRAIN_DIR: '/x/y' }, '/h'), path.resolve('/x/y'));
+});
+
+test('brainDir never falls back to ~/brain, even if it exists', () => {
+  const home = tmpDir();
+  fs.mkdirSync(path.join(home, 'brain'), { recursive: true });
+  fs.writeFileSync(path.join(home, 'brain', 'AGENTS.md'), 'x\n');
+  assert.equal(brainDir({}, home), path.join(home, 'Ionian', 'brain'));
+  assert.equal(brainDir({ IONIAN_HOME: path.join(home, 'ih') }, home), path.join(home, 'ih', 'brain'));
 });
 
 test('hook context names the path only, and both output shapes carry it', () => {
@@ -100,7 +111,7 @@ test('hook context names the path only, and both output shapes carry it', () => 
 
 test('hook script prints one JSON line and exits 0', () => {
   const home = tmpDir();
-  const r = spawnSync(process.execPath, [HOOK], { encoding: 'utf8', env: { ...process.env, HOME: home, USERPROFILE: home, BRAIN_DIR: '' } });
+  const r = spawnSync(process.execPath, [HOOK], { encoding: 'utf8', env: { ...process.env, HOME: home, USERPROFILE: home, BRAIN_DIR: '', IONIAN_HOME: '' } });
   assert.equal(r.status, 0);
   assert.equal(r.stderr, '');
   assert.match(JSON.parse(r.stdout).additionalContext, /no brain folder was found/);

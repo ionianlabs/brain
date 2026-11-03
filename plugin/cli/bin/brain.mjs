@@ -12,7 +12,7 @@ import { isValidDate } from '../src/dates.mjs';
 const USAGE = `Usage: brain <command> [options]
 
 Commands:
-  init [dir]    Create a brain from the template (default: ~/brain)
+  init [dir]    Create a brain from the template (default: ~/Ionian/brain)
   index [dir]   Write the generated block in index.md (default: .)
   lint [dir]    Check the brain against the spec (default: .)
 
@@ -34,14 +34,14 @@ const HELP = {
 Create a brain from the template. Never overwrites an existing file.
 
 Arguments:
-  dir              where to create the brain (default: ~/brain)
+  dir              where to create the brain (default: ~/Ionian/brain)
 
 Flags:
   --example        also copy the fictional sample notes
   --link-skills    symlink the skills into ~/.claude/skills
 
 Example:
-  brain init ~/brain --example --link-skills`,
+  brain init ~/Ionian/brain --example --link-skills`,
   index: `Usage: brain index [dir] [--check]
 
 Write the generated block in index.md. Creates index.md if it is missing.
@@ -53,7 +53,7 @@ Flags:
   --check          write nothing, exit 1 if the index is out of date
 
 Example:
-  brain index ~/brain --check`,
+  brain index ~/Ionian/brain --check`,
   lint: `Usage: brain lint [dir] [--json] [--stale-days N] [--today DATE]
 
 Check the brain against the spec. Never writes files.
@@ -67,7 +67,7 @@ Flags:
   --today DATE     treat DATE (YYYY-MM-DD) as today
 
 Example:
-  brain lint ~/brain --stale-days 7`,
+  brain lint ~/Ionian/brain --stale-days 7`,
 };
 
 const OPTIONS = {

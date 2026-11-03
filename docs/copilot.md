@@ -17,7 +17,7 @@ Copilot reads personal skills from `~/.copilot/skills/`, in VS Code and in Copil
 
 ```sh
 mkdir -p ~/.copilot/skills
-cp -R ~/brain/skills/brief ~/brain/skills/handover ~/.copilot/skills/
+cp -R ~/Ionian/brain/skills/brief ~/Ionian/brain/skills/handover ~/.copilot/skills/
 ```
 
 Then run `/brief` or `/handover`. The paths inside the skills were filled in with the absolute path of your brain when you ran `init`, so the copies work from any folder. If you also install the plugin, remove these copies.

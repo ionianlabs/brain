@@ -23,6 +23,20 @@ export function cliCommand(packageRoot = PACKAGE_ROOT) {
   return inPlugin ? FROM_CLONE : `\`node "${path.join(packageRoot, 'bin', 'brain.mjs')}"\``;
 }
 
+// Default brain folder: BRAIN_DIR, else $IONIAN_HOME/brain, else <home>/Ionian/brain.
+export function defaultBrainDir(env = process.env, home = os.homedir()) {
+  const expandHome = (raw) => {
+    if (raw === '~') return home;
+    if (raw.startsWith('~/') || raw.startsWith('~\\')) return path.join(home, raw.slice(2));
+    return path.resolve(raw);
+  };
+  const explicit = (env.BRAIN_DIR || '').trim();
+  if (explicit) return expandHome(explicit);
+  const ionian = (env.IONIAN_HOME || '').trim();
+  if (ionian) return path.join(expandHome(ionian), 'brain');
+  return path.join(home, 'Ionian', 'brain');
+}
+
 export function resolveHome(options = {}) {
   return options.home || process.env.BRAIN_HOME || os.homedir();
 }
@@ -59,7 +73,7 @@ function shiftDates(content, days) {
 
 export function init(options = {}) {
   const home = resolveHome(options);
-  const dir = path.resolve(options.dir || path.join(home, 'brain'));
+  const dir = path.resolve(options.dir || defaultBrainDir(options.env || process.env, home));
   const templateDir = options.templateDir || path.join(PACKAGE_ROOT, 'template');
   const exampleDir = options.exampleDir || path.join(PACKAGE_ROOT, 'examples', 'sample-brain');
   const result = { dir, created: [], skipped: [], linked: [], linkSkipped: [] };

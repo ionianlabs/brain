@@ -109,9 +109,9 @@ test('lint does not write files', () => {
 test('init runs end to end inside a temp home', () => {
   const root = tmpDir();
   const templateDir = makeTemplate(path.join(root, 'template'));
-  const r = brain(['init', '--link-skills'], { BRAIN_TEMPLATE_DIR: templateDir, BRAIN_HOME: path.join(root, 'home') });
+  const r = brain(['init', '--link-skills'], { BRAIN_TEMPLATE_DIR: templateDir, BRAIN_HOME: path.join(root, 'home'), BRAIN_DIR: '', IONIAN_HOME: '' });
   assert.equal(r.status, 0, r.stderr);
-  assert.ok(fs.existsSync(path.join(root, 'home', 'brain', 'AGENTS.md')));
+  assert.ok(fs.existsSync(path.join(root, 'home', 'Ionian', 'brain', 'AGENTS.md')));
   assert.ok(fs.lstatSync(path.join(root, 'home', '.claude', 'skills', 'handover')).isSymbolicLink());
   assert.match(r.stdout, /Next steps:\n  1\. Open the folder in your editor\./);
 });

@@ -10,7 +10,7 @@ tools: ['search/codebase', 'edit/editFiles', 'execute/runInTerminal']
 
 End a working session for one project. Update its state file, prepend log entries, then check the brain. You may be running inside a work repo, not the brain folder.
 
-Find the brain first. Use the brain folder named in your session context, if there is one. Otherwise use the `BRAIN_DIR` environment variable if it is set, otherwise `{{BRAIN_DIR}}`. Below, `<brain>` is that folder.
+Find the brain first. Use the brain folder named in your session context, if there is one. Otherwise use the `BRAIN_DIR` environment variable if it is set, otherwise `$IONIAN_HOME/brain` if `IONIAN_HOME` is set, otherwise `{{BRAIN_DIR}}`. Below, `<brain>` is that folder.
 
 Find the brain CLI the same way. Use the command named in your session context, if there is one. Otherwise use {{BRAIN_CLI}}. Below, `<cli>` is that command.
 

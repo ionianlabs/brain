@@ -20,7 +20,7 @@ const GENERATED = ['skills', 'cli'];
 const PLUGIN_CLI = 'node "<skill>/../../cli/bin/brain.mjs"`, where `<skill>` is the folder that holds this SKILL.md';
 
 function pluginSkill(text) {
-  const filled = text.split('{{BRAIN_DIR}}').join('~/brain').split('{{BRAIN_CLI}}').join(`\`${PLUGIN_CLI}`);
+  const filled = text.split('{{BRAIN_DIR}}').join('~/Ionian/brain').split('{{BRAIN_CLI}}').join(`\`${PLUGIN_CLI}`);
   // Drop `type:` from the frontmatter only. Plugin hosts do not know the key.
   return filled.replace(/^---\n([\s\S]*?)\n---\n/, (m, fm) =>
     `---\n${fm.split('\n').filter((l) => !/^type:/.test(l)).join('\n')}\n---\n`,

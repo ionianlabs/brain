@@ -11,7 +11,7 @@ This is one ordinary day, using the [sample brain](../examples/sample-brain/inde
 
 ## 08:30, the brief
 
-I open my agent in `~/brain` and say "brief". It reads `index.md`, the project files and the inbox. It edits nothing. This is what comes back.
+I open my agent in `~/Ionian/brain` and say "brief". It reads `index.md`, the project files and the inbox. It edits nothing. This is what comes back.
 
 ```
 Brief for 2026-11-02

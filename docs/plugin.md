@@ -13,7 +13,7 @@ One plugin folder serves three agents: Claude Code, GitHub Copilot CLI and Copil
 
 ## Before you install.
 
-The plugin looks for the brain in `~/brain`. If there is none yet, say "brief" after you install, and the agent offers to create it. The plugin carries the CLI, so you need only Node 20 or newer. To use another folder, set the `BRAIN_DIR` environment variable, for example in your shell profile:
+The plugin looks for the brain in `$IONIAN_HOME/brain` if `IONIAN_HOME` is set, else in `~/Ionian/brain`. `IONIAN_HOME` is the shared home of Ionian products, each of which keeps its data in `$IONIAN_HOME/<product>`. If there is none yet, say "brief" after you install, and the agent offers to create it. The plugin carries the CLI, so you need only Node 20 or newer. To use any other folder, set the `BRAIN_DIR` environment variable, for example in your shell profile:
 
 ```sh
 export BRAIN_DIR="$HOME/notes/brain"
@@ -61,7 +61,7 @@ Say "brief" or run `/brain:brief`.
 
 Plugins, skills and hooks are on by default. An organization can turn them off by policy. If plugins are blocked for you, see [Copilot without the plugin](copilot.md).
 
-The session-start script runs only in a trusted workspace. It is also off when your organization turns off Copilot preview features. The skills still work then, and find the brain through `BRAIN_DIR` or `~/brain`.
+The session-start script runs only in a trusted workspace. It is also off when your organization turns off Copilot preview features. The skills still work then, and find the brain through `BRAIN_DIR`, `$IONIAN_HOME/brain` or `~/Ionian/brain`.
 
 ## What the plugin does.
 
@@ -77,7 +77,8 @@ Each skill looks in this order:
 
 1. The folder named by the session-start script.
 2. The `BRAIN_DIR` environment variable.
-3. `~/brain`.
+3. `$IONIAN_HOME/brain`, if `IONIAN_HOME` is set.
+4. `~/Ionian/brain`.
 
 If none of them holds an `AGENTS.md`, the skill stops and offers to create a brain.
 

@@ -21,21 +21,21 @@ Add the plugin to your agent. It brings the `brief` and `handover` skills to eve
 | Copilot CLI | `copilot plugin marketplace add ionianlabs/brain`, then `copilot plugin install brain@ionianlabs` | `/brief` |
 | Copilot in VS Code | Add `ionianlabs/brain` to `chat.plugins.marketplaces`, then install `brain` from **Chat: Plugins** | `/brain:brief` |
 
-Then say "brief". With no brain yet, the agent offers to create one in `~/brain`. The plugin carries the CLI, so there is nothing else to install. Ask for the sample projects if you want to look around first.
+Then say "brief". With no brain yet, the agent offers to create one in `~/Ionian/brain`. The plugin carries the CLI, so there is nothing else to install. Ask for the sample projects if you want to look around first.
 
 Without the plugin, or for any other agent, clone the repo and run the CLI from it:
 
 ```sh
 git clone https://github.com/ionianlabs/brain
-node brain/bin/brain.mjs init            # creates ~/brain
+node brain/bin/brain.mjs init            # creates ~/Ionian/brain
 node brain/bin/brain.mjs init --example  # same, with sample projects
 ```
 
-Then open your agent in `~/brain` and say "brief", or "Read skills/brief/SKILL.md and follow it."
+Then open your agent in `~/Ionian/brain` and say "brief", or "Read skills/brief/SKILL.md and follow it."
 
 At the end of a session, say "handover".
 
-Details, updates and the routes without the plugin are in [The Brain plugin](https://github.com/ionianlabs/brain/blob/main/docs/plugin.md). For a brain outside `~/brain`, set `BRAIN_DIR`.
+Details, updates and the routes without the plugin are in [The Brain plugin](https://github.com/ionianlabs/brain/blob/main/docs/plugin.md). The folder is `$IONIAN_HOME/brain` if you set `IONIAN_HOME`, else `~/Ionian/brain`. For a brain anywhere else, set `BRAIN_DIR`.
 
 Node 20 or newer is the only requirement.
 
@@ -50,7 +50,7 @@ For a walk through one full day, read [A day with Brain](https://github.com/ioni
 ## What is in the folder.
 
 ```
-~/brain/
+~/Ionian/brain/
   AGENTS.md        the rulebook every agent reads first
   index.md         generated list of projects and knowledge
   projects/        one short state file per project
@@ -127,7 +127,7 @@ Three commands. The CLI only keeps the folder in shape. It never talks to a mode
 Run it from a clone as `node bin/brain.mjs <command>`. Below, `brain` stands for that. With the plugin, the agent gets the exact command at the start of each session.
 
 ```sh
-brain init [dir]     # copy the template into dir (default ~/brain), never overwrite
+brain init [dir]     # copy the template into dir (default ~/Ionian/brain), never overwrite
 brain index [dir]    # write the generated block in index.md (default: .)
 brain lint [dir]     # check the brain against the spec (default: .)
 ```

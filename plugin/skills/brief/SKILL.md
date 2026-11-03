@@ -7,7 +7,7 @@ description: Read-only briefing of the brain. Use when the user says "brief", "m
 
 Give a short, read-only briefing of the brain. Never edit, create, move or delete anything.
 
-Find the brain first. Use the brain folder named in your session context, if there is one. Otherwise use the `BRAIN_DIR` environment variable if it is set, otherwise `~/brain`. Below, `<brain>` is that folder.
+Find the brain first. Use the brain folder named in your session context, if there is one. Otherwise use the `BRAIN_DIR` environment variable if it is set, otherwise `$IONIAN_HOME/brain` if `IONIAN_HOME` is set, otherwise `~/Ionian/brain`. Below, `<brain>` is that folder.
 
 Find the brain CLI the same way. Use the command named in your session context, if there is one. Otherwise use `node "<skill>/../../cli/bin/brain.mjs"`, where `<skill>` is the folder that holds this SKILL.md. Below, `<cli>` is that command.
 
