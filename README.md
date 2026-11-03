@@ -47,6 +47,8 @@ Copy `templates/project.md` to `projects/<slug>.md` and `templates/log.md` to `l
 
 For a walk through one full day, read [A day with Brain](https://github.com/ionianlabs/brain/blob/main/docs/a-day-with-brain.md).
 
+Brain also works next to Ionian Harness. See [Works with Ionian Harness](https://github.com/ionianlabs/brain/blob/main/docs/works-with-harness.md).
+
 ## What is in the folder.
 
 ```

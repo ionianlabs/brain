@@ -1,7 +1,7 @@
 {
   "name": "brain",
   "displayName": "Ionian Brain",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "One memory for all agents, in plain markdown. Brief and handover skills, plus a session-start pointer to your brain folder.",
   "author": {
     "name": "Ionian Labs",

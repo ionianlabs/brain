@@ -40,6 +40,7 @@ End each org with one final line: `No due date: N open items`. N counts the open
 ## Rules
 
 - Every item names its project, for example `[client-a-site]`.
+- If you read a log, read only its top, for example the first 60 lines. New entries go at the top. Do not read a whole log.
 - Never mix one org's details into another org's section. Orgs other than `personal` are isolated from each other.
 - Keep each line short. Do not repeat the full item text if a few words are clear.
 - End with one line that suggests the single most useful next step.
