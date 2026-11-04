@@ -81,3 +81,30 @@ test('every finding message ends with a fix hint sentence', () => {
     for (const f of run(name).findings) assert.match(f.message, /\. [A-Z][^.]*\.$/, `${name}: ${f.message}`);
   }
 });
+
+test('dependency and tool folders are not scanned', async () => {
+  const { walkMarkdown } = await import('../src/notes.mjs');
+  const { computeIndex } = await import('../src/index.mjs');
+  const { copyDir } = await import('./helpers.mjs');
+  const root = tmpDir();
+  copyDir(path.join(FIXTURES, 'clean'), root);
+  const note = '---\ntype: note\ntitle: Ghost\ndescription: Ghost.\nupdated: 2026-10-20\norg: personal\ntags: [x]\n---\n\n# Ghost\n';
+  writeTree(root, {
+    'assets/.venv/lib/python3.12/site-packages/pw/SKILL.md': '# Bundled docs, no frontmatter\n',
+    'assets/venv/README.md': '# no frontmatter\n',
+    'assets/tool/__pycache__/x.md': '# no frontmatter\n',
+    'assets/.tox/x.md': '# no frontmatter\n',
+    'assets/.mypy_cache/x.md': '# no frontmatter\n',
+    'assets/.pytest_cache/x.md': '# no frontmatter\n',
+    'assets/.cache/x.md': '# no frontmatter\n',
+    'assets/myenv/pyvenv.cfg': 'home = /usr/bin\n',
+    'assets/myenv/lib/x.md': '# no frontmatter\n',
+    'knowledge/.venv/ghost.md': note,
+  });
+  const files = walkMarkdown(root);
+  assert.ok(files.includes('knowledge/notes.md'), 'real notes are still found');
+  assert.deepEqual(files.filter((f) => /venv|__pycache__|\.tox|_cache|\.cache|myenv/.test(f)), []);
+  const r = lint(root, { today: TODAY });
+  assert.deepEqual(r.findings, []);
+  assert.ok(!JSON.stringify(computeIndex(root)).includes('Ghost'));
+});

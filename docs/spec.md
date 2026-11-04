@@ -167,7 +167,7 @@ Open item syntax:
 
 ## 11. Lint
 
-Scope: all `.md` files under the brain root, excluding `.git/`, `node_modules/` and `.confidential/`.
+Scope: all `.md` files under the brain root, excluding `.git/`, `node_modules/`, `.confidential/`, dependency and tool folders (`.venv/`, `venv/`, `__pycache__/`, `.tox/`, `.mypy_cache/`, `.pytest_cache/`, `.cache/`) and any folder that holds a `pyvenv.cfg`.
 
 Brain-specific checks (everything except `okf/type-missing`) apply only to notes in `projects/`, `logs/`, `inbox/` and `knowledge/`.
 
