@@ -108,7 +108,7 @@ Each org ends with one line, "No due date: N open items".
 | Addition | What it does | Why |
 |---|---|---|
 | **Session protocol** | One `AGENTS.md`: read at start, write at end. | Works with any agent. The plugin is optional. OKF has no write workflow. |
-| **State and history split** | A short current file per project (about 600 words) plus an append-only log. | Reads stay cheap and nothing is lost. |
+| **State and history split** | A short current file per project (about 300 words plus open items), project notes read on demand, and an append-only log. | Reads stay cheap and nothing is lost. |
 | **Boundaries** | An `org` key keeps clients apart. `.confidential/` holds notes agents leave alone. | Safe across several clients. OKF has no access control. |
 | **Capture path** | `inbox/`, triaged at the next session. | Aimed at the real bottleneck, which is writing. |
 | **Daily payoff** | `brief` and `handover` example skills. | You feel the value the same day. |

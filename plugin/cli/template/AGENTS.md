@@ -20,7 +20,7 @@ If any other file disagrees with this one, this file wins.
 | `projects/<slug>.md` | Project state: the present, nothing else |
 | `logs/<slug>.md` | Project history, newest first |
 | `inbox/YYYY-MM-DD-<slug>.md` | Quick captures, triaged later |
-| `knowledge/<slug>.md` | Durable reference material |
+| `knowledge/<slug>.md` | Reference material. With `project: <slug>` it belongs to one project |
 | `templates/` | Starting points for new notes |
 | `skills/`, `.github/prompts/` | Example skills: `brief` and `handover` |
 | `.confidential/` | Off limits. See Confidential |
@@ -35,6 +35,7 @@ Slugs use lowercase `a-z`, `0-9` and hyphens only.
 2. Read `index.md`.
 3. Read the state file of the project at hand.
 4. List `inbox/`. Triage any captures (see Inbox).
+5. Open a note from the project's notes map only when its description matches the task. Do not read all of them.
 
 ### During
 
@@ -44,7 +45,7 @@ Slugs use lowercase `a-z`, `0-9` and hyphens only.
 
 ### End (handover)
 
-1. Update the project's state file so it describes the present.
+1. Update the project's state file so it describes the present. Keep it within budget and horizon (see Writing rules).
 2. Move done items and decisions to the top of the log, under today's date.
 3. Set `updated` to today in every file you changed.
 4. Rebuild the index: `brain index`.
@@ -72,7 +73,7 @@ Notes live in `projects/`, `logs/`, `inbox/` and `knowledge/`. Each note carries
 | `project` | `projects/` | `phase`: `active`, `paused` or `done`. `focus`: one line on what matters now |
 | `log` | `logs/` | `project`: the slug of its project |
 | `capture` | `inbox/` | none. `org: unknown` is allowed until triage |
-| `note` | `knowledge/` | none |
+| `note` | `knowledge/` | none. Optional `project`: the slug of the one project it belongs to |
 
 Optional keys keep their meaning: `status` is `draft`, `stable` or `deprecated`. `generated`, `verified` and `stale_after` are allowed and preserved. Use only simple YAML: scalars, inline or block lists, one level of nesting.
 
@@ -80,7 +81,9 @@ Copy a starting point from `templates/`.
 
 ## Writing rules
 
-- Project files stay short. Aim for 600 words. Lint warns above 800.
+- Project files stay short: what to act on now. Outside `## Open`, aim for 300 words. Lint warns above 400 words, or above 15 open items.
+- Background a project needs on demand (meeting prep, plan, stakeholder map, method) goes to a knowledge note with `project: <slug>`. `brain index` lists it in the project file's notes map. Write its `description` as the question it answers, because that line is what decides whether an agent opens it.
+- A note that matters only until a date (a meeting prep) gets `stale_after`. When lint flags it as stale, move what still matters to the log or the project, and archive or delete the note.
 - Project files describe the present. They never hold history. `## Now` holds the current state and any decision still in force that a reader needs to know. Finished work and the full decision record go to the log.
 - A project file has this shape: `# Title`, then a `History:` line that links to the log (`/logs/<slug>.md`), then `## Now`, `## Open`, `## People`, `## Links` in that order.
 - History goes to the log. Add entries at the top, under today's date. If today's heading exists, add under it.
@@ -101,6 +104,12 @@ Open items sit under `## Open` in the project file:
 - `owner` and `due` are optional.
 - Add `blocked: reason` inside the parentheses when something is stuck, for example `(owner: Sam, due: 2026-11-10, blocked: waiting for review)`.
 - Do not tick done items. Move them to the log as `Done:` entries.
+- One line per item. Put the detail in a note and link it.
+- Horizon: `## Open` holds about the next two weeks. Later work sits in a plan note (`knowledge/<slug>-plan.md`, `project: <slug>`). Move an item into `## Open` as its date comes close.
+
+### Notes map
+
+`brain index` writes a block between `<!-- brain:notes start -->` and `<!-- brain:notes end -->` into each project file that has notes, before `## Now`. Never edit it by hand.
 
 ## Starting a new project
 
@@ -113,7 +122,7 @@ Open items sit under `## Open` in the project file:
 
 Every note has an `org`. Orgs other than `personal` are isolated from each other.
 
-- A note in one org never links to a note in another org.
+- A note in one org never links to a note in another org, and never names a project of another org in `project`.
 - Never copy content between orgs.
 - Links between `personal` and any org are allowed.
 

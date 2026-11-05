@@ -13,7 +13,7 @@ const USAGE = `Usage: brain <command> [options]
 
 Commands:
   init [dir]    Create a brain from the template (default: ~/Ionian/brain)
-  index [dir]   Write the generated block in index.md (default: .)
+  index [dir]   Write the index block and the project notes maps (default: .)
   lint [dir]    Check the brain against the spec (default: .)
 
 Options:
@@ -44,7 +44,8 @@ Example:
   brain init ~/Ionian/brain --example --link-skills`,
   index: `Usage: brain index [dir] [--check]
 
-Write the generated block in index.md. Creates index.md if it is missing.
+Write the generated block in index.md and the notes map in each project file
+that has knowledge notes. Creates index.md if it is missing.
 
 Arguments:
   dir              the brain folder (default: .)
@@ -149,16 +150,18 @@ if (command === 'init') {
 } else if (command === 'index') {
   const dir = existingDir(rest[0]);
   if (values.check) {
-    const { status } = computeIndex(dir);
-    if (status === 'ok') {
+    const { status, projects } = computeIndex(dir);
+    if (status === 'ok' && projects.length === 0) {
       process.stdout.write('index.md is up to date\n');
     } else {
-      process.stderr.write('index.md is out of date: run brain index\n');
+      if (status !== 'ok') process.stderr.write('index.md is out of date: run brain index\n');
+      for (const p of projects) process.stderr.write(`${p.rel} notes map is out of date: run brain index\n`);
       process.exit(1);
     }
   } else {
-    const { status } = writeIndex(dir);
+    const { status, projects } = writeIndex(dir);
     process.stdout.write(status === 'ok' ? 'index.md is already up to date\n' : 'index.md updated\n');
+    for (const rel of projects) process.stdout.write(`${rel} notes map updated\n`);
   }
 } else {
   const dir = existingDir(rest[0]);

@@ -2,7 +2,7 @@
 type: guide
 description: Public format and CLI contract for Ionian Brain, the markdown memory shared by all agents
 tags: [spec, format, cli, lint]
-updated: 2026-11-02
+updated: 2026-11-05
 ---
 
 # Ionian Brain spec
@@ -29,7 +29,7 @@ A brain is a conformant [Open Knowledge Format](https://github.com/GoogleCloudPl
 | `projects/<slug>.md` | Project state file. A short file per project that says where things stand today |
 | `logs/<slug>.md` | Project history, append-only |
 | `inbox/YYYY-MM-DD-<slug>.md` | Short notes, triaged later |
-| `knowledge/<slug>.md` | Durable reference material |
+| `knowledge/<slug>.md` | Durable reference material. A note may belong to one project (`project: <slug>`) |
 | `templates/` | Note templates |
 | `skills/<name>/SKILL.md`, `.github/prompts/<name>.prompt.md` | Example skills (`handover`, `brief`) |
 | `.confidential/` | Off limits to agents unless you point them at a specific note. A dot-folder, so most search tools skip it. Gitignored by default. Lint never reads it |
@@ -79,6 +79,10 @@ Extra required keys:
 - `project` adds `phase` (`active`, `paused` or `done`) and `focus` (one line: what matters now).
 - `log` adds `project` (the slug of its project).
 
+Optional key:
+
+- `note` may carry `project` (the slug of one project). The note then belongs to that project: it is listed in that project's notes map (4.1) and not under `## Knowledge` in the index. Use it for background a project needs on demand, such as a meeting prep, a plan, a stakeholder map or a method. A note without `project` is shared reference material.
+
 ## 4. Project state file body
 
 A project file describes the present state. It never holds history. History goes to the log.
@@ -90,7 +94,8 @@ A project file describes the present state. It never holds history. History goes
   2. `## Open`: checkbox items.
   3. `## People`: who, role, when to talk to them.
   4. `## Links`: where the work lives (paths or URLs).
-- Target length is 600 words. Lint warns above 800.
+- Budget: the body outside `## Open` and outside the notes map targets 300 words, and lint warns above 400. `## Open` holds at most 15 items. Background goes to a knowledge note with `project: <slug>`, history to the log.
+- Horizon: `## Open` holds what is actionable in about the next two weeks, one line per item. Detail lives in the note the item links to. Later work sits in a plan note (a knowledge note with `project: <slug>`) and moves into `## Open` as its date comes close.
 
 Open item syntax:
 
@@ -101,6 +106,24 @@ Open item syntax:
 - `owner` and `due` are both optional.
 - `blocked: reason` may be added inside the parentheses, for example `(owner: Sam, due: 2026-11-10, blocked: waiting for review)`.
 - Done items are moved to the log. They are not ticked in place.
+
+### 4.1 Notes map
+
+`brain index` writes a notes map into each project file that has notes (3.3). It sits between two markers, each on its own line:
+
+```
+<!-- brain:notes start -->
+Notes (open one only when the task needs it):
+
+- [Title](/knowledge/slug.md): description
+<!-- brain:notes end -->
+```
+
+- One line per note: title (first `# ` heading, else the slug) and `description`. Sorted by slug ascending.
+- Only notes in the same org as the project, or with one side `personal`, are listed.
+- If the markers are missing and the project has notes, the block is inserted before the first `## ` heading, normally `## Now`. If the markers exist and there are no notes, only the two markers remain. A project with no notes and no markers is not touched.
+- Never edit the block by hand. The rest of the file is never changed.
+- The description is what an agent reads to decide whether to open a note. Write it as the question the note answers.
 
 ## 5. Log body
 
@@ -153,12 +176,14 @@ Open item syntax:
 
 - Inside the block, in this order:
   - `## Active`, `## Paused`, `## Done`: projects by `phase`. Empty sections are omitted.
-  - `## Knowledge`: notes from `knowledge/`.
+  - `## Knowledge`: notes from `knowledge/` that are not listed in a project's notes map (4.1).
 - Each line has this form:
 
 ```
 - [Title](/projects/slug.md): description (org, updated YYYY-MM-DD)
 ```
+
+- A project with notes ends its line with the count: `(org, updated YYYY-MM-DD, 3 notes)`.
 
 - Title is the note's first `# ` heading, else the slug.
 - Lines are sorted by `updated` descending, then by slug ascending.
@@ -178,11 +203,12 @@ Brain-specific checks (everything except `okf/type-missing`) apply only to notes
 | `frontmatter/bad-value` | error | `updated` is not a valid `YYYY-MM-DD`; `phase` is not `active`, `paused` or `done`; `type` does not match the folder; `stale_after` is not ISO 8601 with a UTC offset; `status` is not `draft`, `stable` or `deprecated` |
 | `links/broken` | warning | a local link target does not exist |
 | `tags/near-duplicate` | warning | two distinct tags normalize to the same string (lowercase; `_` and spaces to `-`; trailing `s` dropped) or differ by one edit when both are 5 or more characters |
-| `state/over-budget` | warning | a project file body exceeds 800 words |
+| `state/over-budget` | warning | a project file body has more than 400 words outside `## Open` and the notes map, or more than 15 open items |
 | `state/stale` | warning | `phase: active` and `updated` is older than 14 days (`--stale-days N`), or `stale_after` is in the past |
-| `org/cross-link` | error | a note links to a note in a different org and neither org is `personal` |
+| `org/cross-link` | error | a note links to a note in a different org and neither org is `personal`, or the `project` key of a note or log names a project in a different org and neither org is `personal` |
+| `project/unknown` | warning | the `project` key of a knowledge note or log names no `projects/<slug>.md` |
 | `confidential/linked` | warning | a note links into `.confidential/` |
-| `index/out-of-date` | warning | `index.md` is missing, has no markers, or its block differs from what `brain index` would write |
+| `index/out-of-date` | warning | `index.md` is missing, has no markers, or its block differs from what `brain index` would write; or a project file's notes map differs (reported on the project file) |
 
 ### 11.1 Output
 
@@ -237,7 +263,8 @@ Bin `brain`, Node 20 or newer, zero runtime dependencies. It ships in the repo: 
 
 - Default `dir` is `.`.
 - Writes the generated block. Creates `index.md` if missing.
-- `--check` writes nothing and exits 1 if the index is out of date.
+- Writes the notes map in each project file (4.1).
+- `--check` writes nothing and exits 1 if the index or any notes map is out of date.
 
 ### `brain lint [dir]`
 
@@ -252,10 +279,10 @@ Bin `brain`, Node 20 or newer, zero runtime dependencies. It ships in the repo: 
 
 ## 13. Session protocol (for AGENTS.md)
 
-- Start: read `AGENTS.md`, then `index.md`, then the state file of the project at hand. Check `inbox/`.
+- Start: read `AGENTS.md`, then `index.md`, then the state file of the project at hand. Check `inbox/`. Open a note from the project's notes map only when its description matches the task.
 - During: stay inside the project's org.
 - End (handover):
-  1. Update the state file so it describes the present state.
+  1. Update the state file so it describes the present state, within budget and horizon (4).
   2. Move done items and decisions to the top of the log, under today's date.
   3. Set `updated`.
   4. Rebuild the index.
@@ -283,7 +310,7 @@ Never edit anything.
 
 ### `handover`
 
-End a work session for one project. Update its state file, prepend log entries, set `updated`, run `brain index` and `brain lint`, then report what changed.
+End a work session for one project. Update its state file, prepend log entries, set `updated`, run `brain index` and `brain lint`, then report what changed. Handover also keeps the project within budget and horizon: it moves detail into project notes, promotes plan items whose date comes close, and resolves notes whose `stale_after` has passed. The user only asks for the handover.
 
 ### Plugin
 

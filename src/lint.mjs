@@ -4,14 +4,16 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { loadBrain } from './notes.mjs';
 import { extractLinks, resolveLink } from './links.mjs';
-import { computeIndex } from './index.mjs';
+import { computeIndex, NOTES_START, NOTES_END } from './index.mjs';
 import { isValidDate, isIsoWithOffset, daysBetween, localDate } from './dates.mjs';
 
 const PHASES = ['active', 'paused', 'done'];
 const STATUSES = ['draft', 'stable', 'deprecated'];
 const BASE_KEYS = ['description', 'tags', 'org', 'updated'];
 const EXTRA_KEYS = { project: ['phase', 'focus'], log: ['project'] };
-const WORD_LIMIT = 800;
+const WORD_TARGET = 300;
+const WORD_LIMIT = 400;
+const OPEN_LIMIT = 15;
 
 function isEmpty(v) {
   if (v === undefined || v === null) return true;
@@ -63,6 +65,7 @@ export function lint(root, options = {}) {
     const org = text(f.fm.data.org);
     if (org) orgOf.set(f.rel, org);
   }
+  const projectSlugs = new Set(brain.files.filter((f) => f.folder === 'projects').map((f) => f.slug));
 
   for (const f of brain.files) {
     const d = f.fm.data;
@@ -86,18 +89,18 @@ export function lint(root, options = {}) {
       checkStale(f, d, lineOf, add, today, staleDays, nowMs);
     }
 
-    if (f.folder === 'projects') {
-      const words = f.fm.body.split(/\s+/).filter(Boolean).length;
-      if (words > WORD_LIMIT) {
-        add(f.rel, 1, 'warning', 'state/over-budget', `body has ${words} words (target 600, limit ${WORD_LIMIT}). Move history to the log and trim Now.`);
-      }
-    }
+    if (f.folder === 'projects') checkBudget(f, add);
+    if (f.folder === 'knowledge' || f.folder === 'logs') checkProjectKey(f, d, lineOf, add, projectSlugs, orgOf);
 
     checkLinks(f, text(d.org), root, orgOf, add);
   }
 
-  if (computeIndex(root).status !== 'ok') {
+  const index = computeIndex(root);
+  if (index.status !== 'ok') {
     add('index.md', 1, 'warning', 'index/out-of-date', 'index.md is missing or differs from `brain index` output. Run `brain index` to update it.');
+  }
+  for (const p of index.projects) {
+    add(p.rel, p.line, 'warning', 'index/out-of-date', 'the notes map is missing or differs from `brain index` output. Run `brain index` to update it.');
   }
 
   findings.sort((a, b) => {
@@ -131,6 +134,56 @@ function checkValues(f, d, type, lineOf, add) {
   }
   if (text(d.org) === 'unknown' && f.expectedType !== 'capture') {
     bad('org', 'org "unknown" is allowed only for captures. Set the real org, or personal.');
+  }
+}
+
+// Split a project body into prose words outside ## Open and the notes map,
+// and the number of open items under ## Open.
+export function budget(bodyLines) {
+  let words = 0;
+  let open = 0;
+  let section = null;
+  let fence = false;
+  let inMap = false;
+  for (const { text: line } of bodyLines) {
+    const t = line.trim();
+    if (t === NOTES_START) { inMap = true; continue; }
+    if (t === NOTES_END) { inMap = false; continue; }
+    if (inMap) continue;
+    if (/^\s*(```|~~~)/.test(line)) fence = !fence;
+    else if (!fence && /^## /.test(line)) section = line.slice(3).trim();
+    if (section === 'Open') {
+      if (!fence && /^\s*- \[ \]/.test(line)) open++;
+      continue;
+    }
+    words += line.split(/\s+/).filter(Boolean).length;
+  }
+  return { words, open };
+}
+
+function checkBudget(f, add) {
+  const { words, open } = budget(f.fm.bodyLines);
+  if (words > WORD_LIMIT) {
+    add(f.rel, 1, 'warning', 'state/over-budget', `body outside ## Open has ${words} words (target ${WORD_TARGET}, limit ${WORD_LIMIT}). Move background to a knowledge note with project: ${f.slug}, and history to the log.`);
+  }
+  if (open > OPEN_LIMIT) {
+    add(f.rel, 1, 'warning', 'state/over-budget', `## Open has ${open} items (limit ${OPEN_LIMIT}). Keep the next two weeks in Open and move later items to a plan note.`);
+  }
+}
+
+// The project key of a knowledge note or log must name an existing project in the same org.
+function checkProjectKey(f, d, lineOf, add, projectSlugs, orgOf) {
+  const slug = text(d.project);
+  if (!slug) return;
+  if (!projectSlugs.has(slug)) {
+    add(f.rel, lineOf('project'), 'warning', 'project/unknown', `project "${slug}" has no project file /projects/${slug}.md. Fix the slug or remove the key.`);
+    return;
+  }
+  const mine = text(d.org);
+  const theirs = orgOf.get(`projects/${slug}.md`);
+  const neutral = (o) => !o || o === 'personal' || o === 'unknown';
+  if (!neutral(mine) && !neutral(theirs) && mine !== theirs) {
+    add(f.rel, lineOf('project'), 'error', 'org/cross-link', `project "${slug}" is in org ${theirs} and this note is in org ${mine}. Move the note to org ${theirs} or remove the project key.`);
   }
 }
 

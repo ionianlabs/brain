@@ -9,7 +9,7 @@ This is the sample brain: three fictional projects, two captures and one knowled
 <!-- brain:index start -->
 ## Active
 
-- [Harbor Bakery online ordering](/projects/harbor-bakery-ordering.md): Online ordering page for Harbor Bakery, with pickup slots (client-a, updated 2026-11-01)
+- [Harbor Bakery online ordering](/projects/harbor-bakery-ordering.md): Online ordering page for Harbor Bakery, with pickup slots (client-a, updated 2026-11-01, 1 note)
 - [Tidewater Library relaunch](/projects/tidewater-library-relaunch.md): Website relaunch for the Tidewater town library (client-b, updated 2026-10-30)
 
 ## Paused

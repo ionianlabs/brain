@@ -12,6 +12,12 @@ focus: Order form on staging, pickup rules and emails
 
 History: [log](/logs/harbor-bakery-ordering.md)
 
+<!-- brain:notes start -->
+Notes (open one only when the task needs it):
+
+- [Harbor Bakery ordering plan](/knowledge/harbor-bakery-ordering-plan.md): What comes after launch for Harbor Bakery ordering, and when each item moves into Open
+<!-- brain:notes end -->
+
 ## Now
 
 - The order form is live on staging with pickup slots.

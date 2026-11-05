@@ -1,6 +1,6 @@
 {
   "name": "@ionianlabs/brain",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "private": true,
   "description": "An open-source markdown memory for coding agents: a folder format, a session protocol, and a small CLI to init, index and lint it.",
   "type": "module",
