@@ -32,7 +32,7 @@ Group the whole report by org, with one heading per org (`personal` last). Insid
 - **Blocked**: open items with `blocked`, with the reason.
 - **Who to talk to**: the owners of overdue, due-soon and blocked items, plus People whose entry says when to talk to them.
 - **Changed in the last 7 days**: notes with `updated` in the last 7 days.
-- **Inbox**: the count of captures and their file names. A capture with `org: unknown` goes in a separate "Unsorted" group at the end.
+- **Inbox**: the count of captures and their file names. A capture with `org: unknown` goes in a separate "Unsorted" group at the end. For an Instinct day file (`source: flow`), also give the number of lines still marked `- [ ]`, and suggest the `instinct` skill.
 - **Hygiene**: a short summary of the lint result, with the counts of errors and warnings and the most important findings. Hygiene findings are listed under the org of the note they name.
 
 End each org with one final line: `No due date: N open items`. N counts the open items in that org that have no `due`.

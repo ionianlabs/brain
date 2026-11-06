@@ -1,8 +1,8 @@
 {
   "name": "brain",
   "displayName": "Ionian Brain",
-  "version": "0.3.0",
-  "description": "One memory for all agents, in plain markdown. Brief and handover skills, plus a session-start pointer to your brain folder.",
+  "version": "0.4.0",
+  "description": "One memory for all agents, in plain markdown. Brief, handover and instinct skills, plus a session-start pointer to your brain folder.",
   "author": {
     "name": "Ionian Labs",
     "url": "https://ionian.dev"
@@ -15,6 +15,7 @@
     "markdown",
     "agents",
     "brief",
-    "handover"
+    "handover",
+    "instinct"
   ]
 }

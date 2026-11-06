@@ -13,7 +13,7 @@ Every agent chat starts at zero. The context lives in your head, in old chats an
 
 ## Quickstart.
 
-Add the plugin to your agent. It brings the `brief` and `handover` skills to every repo, and tells each new session where your brain is.
+Add the plugin to your agent. It brings the `brief`, `handover` and `instinct` skills to every repo, and tells each new session where your brain is.
 
 | Agent | Install | Run |
 |---|---|---|
@@ -47,7 +47,7 @@ Copy `templates/project.md` to `projects/<slug>.md` and `templates/log.md` to `l
 
 For a walk through one full day, read [A day with Brain](https://github.com/ionianlabs/brain/blob/main/docs/a-day-with-brain.md).
 
-Brain also works next to Ionian Harness. See [Works with Ionian Harness](https://github.com/ionianlabs/brain/blob/main/docs/works-with-harness.md).
+Brain also works next to Ionian Harness. See [Works with Ionian Harness](https://github.com/ionianlabs/brain/blob/main/docs/works-with-harness.md). With Ionian Flow, its Instinct feature proposes to-dos, decisions and facts from what you say, and the `instinct` skill lets you review them. See [Works with Ionian Flow](https://github.com/ionianlabs/brain/blob/main/docs/works-with-flow.md).
 
 ## What is in the folder.
 
@@ -60,7 +60,7 @@ Brain also works next to Ionian Harness. See [Works with Ionian Harness](https:/
   inbox/           quick captures, triaged at the next session
   knowledge/       durable reference notes
   templates/       note templates
-  skills/          example skills: brief, handover
+  skills/          example skills: brief, handover, instinct
   .confidential/   notes agents leave alone (gitignored)
 ```
 

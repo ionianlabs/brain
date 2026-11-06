@@ -2,12 +2,12 @@
 type: guide
 description: Install the Brain plugin in Claude Code, GitHub Copilot CLI or Copilot in VS Code, and what it does
 tags: [plugin, setup, claude-code, copilot]
-updated: 2026-11-02
+updated: 2026-11-05
 ---
 
 # The Brain plugin
 
-The plugin brings the `brief` and `handover` skills to every repo you work in. It also tells each new session where your brain folder is. It is optional. The brain is the folder, and any agent that reads `AGENTS.md` can use it without the plugin.
+The plugin brings the `brief`, `handover` and `instinct` skills to every repo you work in. It also tells each new session where your brain folder is. It is optional. The brain is the folder, and any agent that reads `AGENTS.md` can use it without the plugin.
 
 One plugin folder serves three agents: Claude Code, GitHub Copilot CLI and Copilot in VS Code. They all read the same format.
 
@@ -65,7 +65,7 @@ The session-start script runs only in a trusted workspace. It is also off when y
 
 ## What the plugin does.
 
-- **Skills.** `brief` reads the brain and reports what needs you today. It never edits anything. `handover` updates one project's state file and log, then rebuilds the index and runs lint.
+- **Skills.** `brief` reads the brain and reports what needs you today. It never edits anything. `handover` updates one project's state file and log, then rebuilds the index and runs lint. `instinct` walks you through what Ionian Flow's Instinct proposed in the inbox and files what you accept (see [works with Flow](works-with-flow.md)).
 - **CLI.** A copy of the brain CLI, in `cli/`. The skills use it to rebuild the index, run lint and create a brain.
 - **Session start.** A small Node script runs when a session starts. It adds a few sentences to the session: the path of your brain folder, the command that runs the CLI, and a note to read `AGENTS.md` when the task touches your projects. If there is no brain yet, it says so and names the `init` command.
 

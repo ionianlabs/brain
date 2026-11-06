@@ -32,12 +32,12 @@ function manifest(pkg) {
     name: 'brain',
     displayName: 'Ionian Brain',
     version: pkg.version,
-    description: 'One memory for all agents, in plain markdown. Brief and handover skills, plus a session-start pointer to your brain folder.',
+    description: 'One memory for all agents, in plain markdown. Brief, handover and instinct skills, plus a session-start pointer to your brain folder.',
     author: { name: 'Ionian Labs', url: 'https://ionian.dev' },
     homepage: 'https://github.com/ionianlabs/brain',
     repository: 'https://github.com/ionianlabs/brain',
     license: pkg.license,
-    keywords: ['memory', 'markdown', 'agents', 'brief', 'handover'],
+    keywords: ['memory', 'markdown', 'agents', 'brief', 'handover', 'instinct'],
   };
 }
 

@@ -72,7 +72,7 @@ Notes live in `projects/`, `logs/`, `inbox/` and `knowledge/`. Each note carries
 |---|---|---|
 | `project` | `projects/` | `phase`: `active`, `paused` or `done`. `focus`: one line on what matters now |
 | `log` | `logs/` | `project`: the slug of its project |
-| `capture` | `inbox/` | none. `org: unknown` is allowed until triage |
+| `capture` | `inbox/` | Optional `source`: where it came from, for example `flow` for Ionian Flow's Instinct. `org: unknown` is allowed until triage |
 | `note` | `knowledge/` | none. Optional `project`: the slug of the one project it belongs to |
 
 Optional keys keep their meaning: `status` is `draft`, `stable` or `deprecated`. `generated`, `verified` and `stale_after` are allowed and preserved. Use only simple YAML: scalars, inline or block lists, one level of nesting.
@@ -141,6 +141,8 @@ Anyone may add a capture: `inbox/YYYY-MM-DD-<slug>.md` with `type: capture`. At 
 3. Delete the capture file.
 
 If you cannot tell where it belongs, ask the user. Do not guess an org.
+
+An Instinct day file (`inbox/YYYY-MM-DD-instinct.md`, `source: flow`) is the exception: review it with the `instinct` skill, and archive it to `_archive/inbox/` instead of deleting it. Ionian Flow reads the archived files to measure its precision.
 
 ## Index
 

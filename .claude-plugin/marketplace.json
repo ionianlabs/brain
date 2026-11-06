@@ -6,7 +6,7 @@
     {
       "name": "brain",
       "source": "./plugin",
-      "description": "One memory for all agents, in plain markdown. Brief and handover skills, plus a session-start pointer to your brain folder.",
+      "description": "One memory for all agents, in plain markdown. Brief, handover and instinct skills, plus a session-start pointer to your brain folder.",
       "category": "productivity",
       "tags": ["memory", "markdown", "notes"]
     }

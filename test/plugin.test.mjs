@@ -40,7 +40,7 @@ test('builds plugin skills with ~/Ionian/brain and without the type key', () => 
 });
 
 test('Copilot prompt files say the same as the skills', () => {
-  for (const name of ['brief', 'handover']) {
+  for (const name of ['brief', 'handover', 'instinct']) {
     const skill = fs.readFileSync(path.join(ROOT, 'template/skills', name, 'SKILL.md'), 'utf8');
     const prompt = fs.readFileSync(path.join(ROOT, 'template/.github/prompts', `${name}.prompt.md`), 'utf8');
     assert.equal(body(prompt), body(skill), name);
