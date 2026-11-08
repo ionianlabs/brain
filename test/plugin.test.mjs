@@ -40,15 +40,15 @@ test('builds plugin skills with ~/Ionian/brain and without the type key', () => 
 });
 
 test('Copilot prompt files say the same as the skills', () => {
-  for (const name of ['agenda', 'drop', 'triage', 'sync', 'instinct']) {
+  for (const name of ['agenda', 'drop', 'triage', 'sync', 'aware']) {
     const skill = fs.readFileSync(path.join(ROOT, 'template/skills', name, 'SKILL.md'), 'utf8');
     const prompt = fs.readFileSync(path.join(ROOT, 'template/.github/prompts', `${name}.prompt.md`), 'utf8');
     assert.equal(body(prompt), body(skill), name);
   }
 });
 
-test('F6.2 plugin/skills holds agenda, drop, triage, sync and instinct, and the build leaves plugin/agents alone', () => {
-  assert.deepEqual(fs.readdirSync(path.join(ROOT, 'plugin/skills')).sort(), ['agenda', 'drop', 'instinct', 'sync', 'triage']);
+test('F6.2 plugin/skills holds agenda, drop, triage, sync and aware, and the build leaves plugin/agents alone', () => {
+  assert.deepEqual(fs.readdirSync(path.join(ROOT, 'plugin/skills')).sort(), ['agenda', 'aware', 'drop', 'sync', 'triage']);
   const files = Object.keys(pluginFiles({ rootDir: ROOT }));
   assert.ok(!files.some((f) => f.startsWith('agents/')));
   assert.ok(files.some((f) => f.startsWith('skills/')) && files.some((f) => f.startsWith('cli/')));

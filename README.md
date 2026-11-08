@@ -13,7 +13,7 @@ Every agent chat starts at zero. The context lives in your head, in old chats an
 
 ## Quickstart.
 
-Add the plugin to your agent. It brings the `agenda`, `drop`, `triage`, `sync` and `instinct` skills, and the `reader` and `scribe` agents, to every repo, and tells each new session where your brain is.
+Add the plugin to your agent. It brings the `agenda`, `drop`, `triage`, `sync` and `aware` skills, and the `reader` and `scribe` agents, to every repo, and tells each new session where your brain is.
 
 | Agent | Install | Run |
 |---|---|---|
@@ -47,7 +47,7 @@ Copy `templates/project.md` to `projects/<slug>.md` and `templates/log.md` to `l
 
 For a walk through one full day, read [A day with Brain](https://github.com/ionianlabs/brain/blob/main/docs/a-day-with-brain.md).
 
-Brain also works next to Ionian Harness. See [Works with Ionian Harness](https://github.com/ionianlabs/brain/blob/main/docs/works-with-harness.md). With Ionian Flow, its Instinct feature proposes to-dos, decisions and facts from what you say, and the `instinct` skill lets you review them. See [Works with Ionian Flow](https://github.com/ionianlabs/brain/blob/main/docs/works-with-flow.md).
+Brain also works next to Ionian Harness. See [Works with Ionian Harness](https://github.com/ionianlabs/brain/blob/main/docs/works-with-harness.md). With Ionian Flow, its Aware feature proposes to-dos, decisions and facts from what you say, and the `aware` skill lets you review them. See [Works with Ionian Flow](https://github.com/ionianlabs/brain/blob/main/docs/works-with-flow.md).
 
 ## What is in the folder.
 
@@ -60,7 +60,7 @@ Brain also works next to Ionian Harness. See [Works with Ionian Harness](https:/
   inbox/           quick captures, triaged at the next session
   knowledge/       durable reference notes
   templates/       note templates
-  skills/          example skills: agenda, drop, triage, sync, instinct
+  skills/          example skills: agenda, drop, triage, sync, aware
   .confidential/   notes agents leave alone (gitignored)
 ```
 

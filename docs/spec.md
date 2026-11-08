@@ -31,7 +31,7 @@ A brain is a conformant [Open Knowledge Format](https://github.com/GoogleCloudPl
 | `inbox/YYYY-MM-DD-<slug>.md` | Short notes, triaged later |
 | `knowledge/<slug>.md` | Durable reference material. A note may belong to one project (`project: <slug>`) |
 | `templates/` | Note templates |
-| `skills/<name>/SKILL.md`, `.github/prompts/<name>.prompt.md` | Example skills (`agenda`, `drop`, `triage`, `sync`, `instinct`) |
+| `skills/<name>/SKILL.md`, `.github/prompts/<name>.prompt.md` | Example skills (`agenda`, `drop`, `triage`, `sync`, `aware`) |
 | `.confidential/` | Off limits to agents unless you point them at a specific note. A dot-folder, so most search tools skip it. Gitignored by default. Lint never reads it |
 
 Slugs use lowercase `a-z`, `0-9` and hyphens only.
@@ -331,13 +331,13 @@ Capture a thought from any chat. Writes exactly one file, `inbox/YYYY-MM-DD-<slu
 
 ### `triage`
 
-Empty the inbox one capture at a time. Each verdict places a capture as an open item (always with `prio`), a log bullet, a knowledge note, or a new project, or bins it. `Said`/`Inferred` bullets go to the destination project's log, with a `Triaged capture: <filename>` bullet, and the capture is then discarded. `source: flow` day files go to `instinct`. Ends with `brain index` and `brain lint`.
+Empty the inbox one capture at a time. Each verdict places a capture as an open item (always with `prio`), a log bullet, a knowledge note, or a new project, or bins it. `Said`/`Inferred` bullets go to the destination project's log, with a `Triaged capture: <filename>` bullet, and the capture is then discarded. `source: flow` day files go to `aware`. Ends with `brain index` and `brain lint`.
 
 ### `sync`
 
 Replaces `handover`; "handover", "end session", "wrap up" and "save to brain" still trigger it. Writes a work session back for one project: it updates the state file, prepends log entries with provenance prefixes, keeps the project within budget and horizon (detail into project notes, plan items promoted as their date comes close, stale notes resolved), sets `updated`, runs `brain index` and `brain lint`, and reports what changed. New open items always carry `prio` and are confirmed by the owner as one batch in the closing summary.
 
-### `instinct`
+### `aware`
 
 The triage specialization for `source: flow` day files: it walks Ionian Flow's proposals, files what the owner accepts and archives the file. See [works with Flow](works-with-flow.md).
 

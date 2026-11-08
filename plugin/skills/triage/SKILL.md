@@ -1,6 +1,6 @@
 ---
 name: triage
-description: Empty the brain inbox one decision at a time. Use when the user says "triage", "sort the inbox" or "process my captures". Walks each capture, proposes a destination, and places it as an open item with a priority, a log bullet, a knowledge note or a new project, or bins it. Instinct day files go to the instinct skill.
+description: Empty the brain inbox one decision at a time. Use when the user says "triage", "sort the inbox" or "process my captures". Walks each capture, proposes a destination, and places it as an open item with a priority, a log bullet, a knowledge note or a new project, or bins it. Aware day files go to the aware skill.
 ---
 
 # Triage
@@ -20,7 +20,7 @@ Where the host supports subagents, reads go through the `reader` agent and write
 ## Steps
 
 1. Read `<brain>/AGENTS.md`, then `<brain>/index.md`. List `<brain>/inbox/`. If the inbox is empty, say "inbox empty", write nothing, and stop. Skip step 7.
-2. Route `source: flow` day files (`inbox/YYYY-MM-DD-instinct.md`) to the `instinct` skill. Handle the other captures here.
+2. Route `source: flow` day files (`inbox/YYYY-MM-DD-aware.md`) to the `aware` skill. Handle the other captures here.
 3. For each capture, read it and present a one-line summary and the proposed destination: an open item for a project, a log bullet, a knowledge note, a new project, or the bin. If you cannot tell the org, ask the owner. Never guess an org.
 4. Act on the owner's verdict. Never decide for the owner.
 5. Placement. A verdict issues these write orders:
@@ -31,7 +31,7 @@ Where the host supports subagents, reads go through the `reader` agent and write
    - **Provenance**: when the capture carries `Said(Name):` or `Inferred:` bullets, also write those bullets to the destination project's log, whatever the destination (for a knowledge note, the log of its `project:`). A log-bullet destination writes them once, not twice.
    - **Bookkeeping**: always a `Triaged capture: <filename>` log bullet in that same log, then a `capture-discard`.
    - **Bin**: a "bin" verdict issues only the `capture-discard`. No project, log or knowledge file changes.
-6. Capture-discard deletes the capture file. When the AGENTS.md Inbox rules name an archive folder for captures, it moves the file there instead. The plugin default is delete. `source: flow` files are archived by `instinct`.
+6. Capture-discard deletes the capture file. When the AGENTS.md Inbox rules name an archive folder for captures, it moves the file there instead. The plugin default is delete. `source: flow` files are archived by `aware`.
 7. When the last capture is done, run `<cli> index "<brain>"` and `<cli> lint "<brain>"`, fix every error you caused, and give a summary: how many captures were placed, where, and how many were binned. On the subagent path `scribe` runs both and returns the findings.
 
 ## Rules

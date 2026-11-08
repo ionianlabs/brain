@@ -8,11 +8,11 @@ Date: 2026-11-08
 
 A brain accumulates facts from several authors: the owner, people the owner talked to, and agents writing on their behalf. The format records none of that, so six weeks later nobody can tell whether "switch to weekly releases" was the owner's decision, a colleague's remark or an agent's guess. Open items carry no priority, so `## Open` across ten projects reads as one flat, endless list and any cross-project ranking lives in hand-edited prose that goes stale. There is also no machine-readable view over open items: every agent that wants "what is due" must load every project file into its context, which is slow, token-hungry and invites the model to free-associate over unrelated prose. This spec adds the minimal grammar (author prefixes, a `prio` field) and one read-only CLI command (`brain open`) that later skills build on.
 
-Context: the brain folder layout, note types, open-item syntax, log shape, lint rules and CLI conventions this spec extends are defined in docs/spec.md (sections 2 to 6, 11 and 12), and the skills it mentions in passing are outlined in section 14 (brief, handover) and template/skills/instinct/SKILL.md (instinct). `budget()` and the lint rule names live in src/lint.mjs. Read that contract first; a term not defined here is used exactly as it defines it.
+Context: the brain folder layout, note types, open-item syntax, log shape, lint rules and CLI conventions this spec extends are defined in docs/spec.md (sections 2 to 6, 11 and 12), and the skills it mentions in passing are outlined in section 14 (brief, handover) and template/skills/aware/SKILL.md (aware). `budget()` and the lint rule names live in src/lint.mjs. Read that contract first; a term not defined here is used exactly as it defines it.
 
 ## Out of scope
 
-- New or changed skills (`brief`, `handover`, `instinct` or successors). A separate spec, `lifecycle-skills`, builds on this one.
+- New or changed skills (`brief`, `handover`, `aware` or successors). A separate spec, `lifecycle-skills`, builds on this one.
 - Subagents, session protocol or AGENTS.md rule changes beyond documenting the grammar.
 - Rewriting existing brain content to the new grammar. Old bullets and items stay valid.
 - Any scheduling, reminders or calendar integration.

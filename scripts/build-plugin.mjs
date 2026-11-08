@@ -32,12 +32,12 @@ function manifest(pkg) {
     name: 'brain',
     displayName: 'Ionian Brain',
     version: pkg.version,
-    description: 'One memory for all agents, in plain markdown. Agenda, drop, triage, sync and instinct skills, reader and scribe agents, plus a session-start pointer to your brain folder.',
+    description: 'One memory for all agents, in plain markdown. Agenda, drop, triage, sync and aware skills, reader and scribe agents, plus a session-start pointer to your brain folder.',
     author: { name: 'Ionian Labs', url: 'https://ionian.dev' },
     homepage: 'https://github.com/ionianlabs/brain',
     repository: 'https://github.com/ionianlabs/brain',
     license: pkg.license,
-    keywords: ['memory', 'markdown', 'agents', 'agenda', 'drop', 'triage', 'sync', 'instinct'],
+    keywords: ['memory', 'markdown', 'agents', 'agenda', 'drop', 'triage', 'sync', 'aware'],
   };
 }
 

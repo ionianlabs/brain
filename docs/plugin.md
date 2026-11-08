@@ -7,7 +7,7 @@ updated: 2026-11-05
 
 # The Brain plugin
 
-The plugin brings the `agenda`, `drop`, `triage`, `sync` and `instinct` skills, and the `reader` and `scribe` agents, to every repo you work in. It also tells each new session where your brain folder is. It is optional. The brain is the folder, and any agent that reads `AGENTS.md` can use it without the plugin.
+The plugin brings the `agenda`, `drop`, `triage`, `sync` and `aware` skills, and the `reader` and `scribe` agents, to every repo you work in. It also tells each new session where your brain folder is. It is optional. The brain is the folder, and any agent that reads `AGENTS.md` can use it without the plugin.
 
 One plugin folder serves three agents: Claude Code, GitHub Copilot CLI and Copilot in VS Code. They all read the same format.
 
@@ -65,7 +65,7 @@ The session-start script runs only in a trusted workspace. It is also off when y
 
 ## What the plugin does.
 
-- **Skills.** `agenda` shows what needs you now, at most 5 items and 20 lines, and never edits anything. `drop` captures a thought from any chat into the inbox. `triage` places the captures one decision at a time. `sync` updates one project's state file and log, then rebuilds the index and runs lint. Outside triage and sync, a session writes only captures. `instinct` walks you through what Ionian Flow's Instinct proposed in the inbox and files what you accept (see [works with Flow](works-with-flow.md)).
+- **Skills.** `agenda` shows what needs you now, at most 5 items and 20 lines, and never edits anything. `drop` captures a thought from any chat into the inbox. `triage` places the captures one decision at a time. `sync` updates one project's state file and log, then rebuilds the index and runs lint. Outside triage and sync, a session writes only captures. `aware` walks you through what Ionian Flow's Aware proposed in the inbox and files what you accept (see [works with Flow](works-with-flow.md)).
 - **Agents.** On hosts with subagents, `reader` answers file questions with short `path:line` bullets and `scribe` applies write orders and runs index and lint, so file contents stay out of your thread. Hosts without subagents run the same steps inline.
 - **CLI.** A copy of the brain CLI, in `cli/`. The skills use it to rebuild the index, run lint and create a brain.
 - **Session start.** A small Node script runs when a session starts. It adds a few sentences to the session: the path of your brain folder, the command that runs the CLI, and a note to read `AGENTS.md` when the task touches your projects. If there is no brain yet, it says so and names the `init` command.

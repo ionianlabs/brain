@@ -21,7 +21,7 @@ If `<brain>/AGENTS.md` does not exist, say that no brain was found there and off
 1. Read `<brain>/AGENTS.md`. If it has an `## Agenda rules` block, read and obey it. Rules may tighten the report. They never raise the 5-item or 20-line caps.
 2. Take today's date from the system. Compare dates by whole days.
 3. Run `<cli> open "<brain>" --json`. This is your only source for open items. Add `--project <slug>` or `--org <slug>` when the user gave a scope. Never read project files in bulk.
-4. List `<brain>/inbox/`. Count the captures. Note the Instinct day files (`source: flow`) and how many lines in them are still marked `- [ ]`. If you cannot list the folder, say so in the report. Do not write "none".
+4. List `<brain>/inbox/`. Count the captures. Note the Aware day files (`source: flow`) and how many lines in them are still marked `- [ ]`. If you cannot list the folder, say so in the report. Do not write "none".
 5. Run `<cli> lint "<brain>"` and read the output.
 6. If `<cli> open` or `<cli> lint` cannot run, say which data is missing and report the rest. Never write "none" for data you could not get.
 7. Never open `.confidential/`, even if a note mentions it.
@@ -35,7 +35,7 @@ The report has an attention budget: at most 5 items under "Needs you" and at mos
 2. **Needs you**: every p0 item regardless of due date, plus overdue and due-today items of any priority, ranked as `<cli> open` ranks them, at most 5. Fold the rest of the eligible items into one line, `and K more need you — say more`. Saying "more" expands the whole section.
 3. **Coming up**: items due in the next 3 days (scope "week" widens this to 7 days), p0 and p1 only, same ranking. An item appears in one section only, the earliest that admits it.
 4. **Blocked**: items with `blocked`, with the reason and the `owner` as who to talk to.
-5. **Inbox**: the count only. Call out Instinct day files, and say "say triage".
+5. **Inbox**: the count only. Call out Aware day files, and say "say triage".
 6. **Hygiene**: one line, only when lint reports errors or over-budget or stale warnings.
 7. **Honesty line**: exactly one line with the totals of held-back items and of unranked or undated items. Give the per-project breakdown only when asked.
 
@@ -83,7 +83,7 @@ Coming up
 - p1  [atlas] Review the budget (due 2026-11-10)
 Blocked
 - [rover] Publish the pricing page: waiting for legal review (talk to Ada)
-Inbox: 4 captures, 1 Instinct day file, say triage
+Inbox: 4 captures, 1 Aware day file, say triage
 Hygiene: 0 errors, 1 warning (atlas is over its word budget)
 Held back: 18 items with no line here, 6 of them undated or unranked
 Next step: ask Ada about the pricing page.
