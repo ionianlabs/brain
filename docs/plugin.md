@@ -7,13 +7,13 @@ updated: 2026-11-05
 
 # The Brain plugin
 
-The plugin brings the `brief`, `handover` and `instinct` skills to every repo you work in. It also tells each new session where your brain folder is. It is optional. The brain is the folder, and any agent that reads `AGENTS.md` can use it without the plugin.
+The plugin brings the `agenda`, `drop`, `triage`, `sync` and `instinct` skills, and the `reader` and `scribe` agents, to every repo you work in. It also tells each new session where your brain folder is. It is optional. The brain is the folder, and any agent that reads `AGENTS.md` can use it without the plugin.
 
 One plugin folder serves three agents: Claude Code, GitHub Copilot CLI and Copilot in VS Code. They all read the same format.
 
 ## Before you install.
 
-The plugin looks for the brain in `$IONIAN_HOME/brain` if `IONIAN_HOME` is set, else in `~/Ionian/brain`. `IONIAN_HOME` is the shared home of Ionian products, each of which keeps its data in `$IONIAN_HOME/<product>`. If there is none yet, say "brief" after you install, and the agent offers to create it. The plugin carries the CLI, so you need only Node 20 or newer. To use any other folder, set the `BRAIN_DIR` environment variable, for example in your shell profile:
+The plugin looks for the brain in `$IONIAN_HOME/brain` if `IONIAN_HOME` is set, else in `~/Ionian/brain`. `IONIAN_HOME` is the shared home of Ionian products, each of which keeps its data in `$IONIAN_HOME/<product>`. If there is none yet, say "agenda" after you install, and the agent offers to create it. The plugin carries the CLI, so you need only Node 20 or newer. To use any other folder, set the `BRAIN_DIR` environment variable, for example in your shell profile:
 
 ```sh
 export BRAIN_DIR="$HOME/notes/brain"
@@ -30,7 +30,7 @@ In a session:
 
 From a terminal, the same with `claude plugin marketplace add ionianlabs/brain` and `claude plugin install brain@ionianlabs`.
 
-Say "brief" or run `/brain:brief`. At the end of a session, say "handover" or run `/brain:handover`.
+Say "agenda" or run `/brain:agenda`. To capture a thought from any chat, say "drop this: …". Say "triage" to place what waits in the inbox. At the end of a session, say "sync" or run `/brain:sync`.
 
 To update, run `claude plugin update brain@ionianlabs`, or turn on auto-update for the marketplace in `/plugin`. Updates load in the next session.
 
@@ -41,7 +41,7 @@ copilot plugin marketplace add ionianlabs/brain
 copilot plugin install brain@ionianlabs
 ```
 
-Say "brief" or run `/brief`. Copilot CLI does not prefix plugin skills, so a personal or project skill with the same name wins over the plugin's.
+Say "agenda" or run `/agenda`. Copilot CLI does not prefix plugin skills, so a personal or project skill with the same name wins over the plugin's.
 
 To update, run `copilot plugin marketplace update ionianlabs`, then `copilot plugin update brain@ionianlabs`.
 
@@ -57,7 +57,7 @@ Add the marketplace in your user settings. The setting replaces the default list
 
 Then run **Chat: Plugins** from the Command Palette, find `brain` and install it. Or run **Chat: Install Plugin from Source** and enter `ionianlabs/brain`.
 
-Say "brief" or run `/brain:brief`.
+Say "agenda" or run `/brain:agenda`.
 
 Plugins, skills and hooks are on by default. An organization can turn them off by policy. If plugins are blocked for you, see [Copilot without the plugin](copilot.md).
 
@@ -65,7 +65,8 @@ The session-start script runs only in a trusted workspace. It is also off when y
 
 ## What the plugin does.
 
-- **Skills.** `brief` reads the brain and reports what needs you today. It never edits anything. `handover` updates one project's state file and log, then rebuilds the index and runs lint. `instinct` walks you through what Ionian Flow's Instinct proposed in the inbox and files what you accept (see [works with Flow](works-with-flow.md)).
+- **Skills.** `agenda` shows what needs you now, at most 5 items and 20 lines, and never edits anything. `drop` captures a thought from any chat into the inbox. `triage` places the captures one decision at a time. `sync` updates one project's state file and log, then rebuilds the index and runs lint. Outside triage and sync, a session writes only captures. `instinct` walks you through what Ionian Flow's Instinct proposed in the inbox and files what you accept (see [works with Flow](works-with-flow.md)).
+- **Agents.** On hosts with subagents, `reader` answers file questions with short `path:line` bullets and `scribe` applies write orders and runs index and lint, so file contents stay out of your thread. Hosts without subagents run the same steps inline.
 - **CLI.** A copy of the brain CLI, in `cli/`. The skills use it to rebuild the index, run lint and create a brain.
 - **Session start.** A small Node script runs when a session starts. It adds a few sentences to the session: the path of your brain folder, the command that runs the CLI, and a note to read `AGENTS.md` when the task touches your projects. If there is no brain yet, it says so and names the `init` command.
 
@@ -95,6 +96,6 @@ The skills in the new brain then run the CLI from that clone. Keep the clone whe
 
 - **Claude Code:** `node brain/bin/brain.mjs init --link-skills` links the skills into `~/.claude/skills/`. VS Code reads that folder too, so do not combine it with the VS Code plugin.
 - **Copilot:** see [Copilot without the plugin](copilot.md).
-- **Any other agent:** open it in the brain folder, or say "Read skills/brief/SKILL.md and follow it."
+- **Any other agent:** open it in the brain folder, or say "Read skills/agenda/SKILL.md and follow it."
 
 Pick one route per agent. If the same skill is installed twice, the agent keeps one of them, and you may not get the copy you expect.

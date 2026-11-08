@@ -20,7 +20,7 @@ History: [log](/logs/<slug>.md)
 
 ## Open
 
-- [ ] <what needs doing> (owner: <Name>, due: <YYYY-MM-DD>)
+- [ ] <what needs doing> (prio: p1, owner: <Name>, due: <YYYY-MM-DD>)
 
 ## People
 

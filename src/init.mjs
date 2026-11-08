@@ -160,8 +160,8 @@ export function formatInit(result) {
     '',
     'Next steps:',
     '  1. Open the folder in your editor.',
-    '  2. Start your agent there and ask for the brief.',
-    '  3. At session end, ask for a handover.',
+    '  2. Start your agent there and ask for the agenda.',
+    '  3. At session end, say sync.',
   );
   return lines.join('\n');
 }

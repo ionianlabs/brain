@@ -20,7 +20,7 @@ const read = (...p) => fs.readFileSync(path.join(...p), 'utf8');
 test('copies the template files', () => {
   const s = setup();
   const r = init(s);
-  for (const f of ['AGENTS.md', 'index.md', 'skills/handover/SKILL.md', '.github/prompts/brief.prompt.md']) {
+  for (const f of ['AGENTS.md', 'index.md', 'skills/sync/SKILL.md', '.github/prompts/agenda.prompt.md']) {
     assert.ok(fs.existsSync(path.join(s.dir, f)), f);
     assert.ok(r.created.includes(f), f);
   }
@@ -40,9 +40,27 @@ test('never overwrites an existing file and reports it as skipped', () => {
 test('substitutes {{BRAIN_DIR}} only in skills/ and .github/prompts/', () => {
   const s = setup();
   init(s);
-  assert.ok(read(s.dir, 'skills/handover/SKILL.md').includes(`Run in ${s.dir} with \`node "${path.join(HERE, '..', 'bin', 'brain.mjs')}"\`.`));
-  assert.ok(read(s.dir, '.github/prompts/brief.prompt.md').includes(`Read ${s.dir}/index.md.`));
+  assert.ok(read(s.dir, 'skills/sync/SKILL.md').includes(`Run in ${s.dir} with \`node "${path.join(HERE, '..', 'bin', 'brain.mjs')}"\`.`));
+  assert.ok(read(s.dir, '.github/prompts/agenda.prompt.md').includes(`Read ${s.dir}/index.md.`));
   assert.ok(read(s.dir, 'AGENTS.md').includes('{{BRAIN_DIR}}'));
+});
+
+test('F6.1 the shipped AGENTS.md carries the funnel, the agenda rules and the memory rule', () => {
+  const s = setup();
+  init({ dir: s.dir, home: s.home });
+  const agents = read(s.dir, 'AGENTS.md');
+  for (const needle of [
+    '## Agenda rules',
+    '### End (sync)',
+    'Outside triage and sync, write only captures.',
+    'Add anything new as a capture to `inbox/`; triage places it.',
+    'Only triage\'s new-project verdict, or the owner deliberately following these steps, creates a project.',
+    'Never let agent-side memory override the brain; propose a new connection as a capture marked Inferred:, never by editing notes.',
+    'List `inbox/` and suggest triage',
+  ]) assert.ok(agents.includes(needle), needle);
+  assert.ok(!agents.includes('Put new facts where they belong'));
+  assert.ok(!agents.includes('Add a capture to `inbox/` when you do not know where something goes'));
+  assert.ok(!agents.includes('End (handover)'));
 });
 
 test('stores gitignore as .gitignore', () => {
@@ -105,9 +123,9 @@ test('example brain lints without errors after init', () => {
 test('link-skills symlinks into a fake home and skips existing names', () => {
   const s = setup();
   const r = init({ ...s, linkSkills: true });
-  const link = path.join(s.home, '.claude', 'skills', 'handover');
+  const link = path.join(s.home, '.claude', 'skills', 'sync');
   assert.deepEqual(r.linked, [link]);
-  assert.equal(fs.realpathSync(link), fs.realpathSync(path.join(s.dir, 'skills', 'handover')));
+  assert.equal(fs.realpathSync(link), fs.realpathSync(path.join(s.dir, 'skills', 'sync')));
 
   const again = init({ ...s, linkSkills: true });
   assert.deepEqual(again.linked, []);
@@ -140,5 +158,5 @@ test('the shipped template has AGENTS.md as its only agent instruction file', ()
   assert.ok(fs.existsSync(path.join(s.dir, 'AGENTS.md')));
   assert.ok(!fs.existsSync(path.join(s.dir, 'CLAUDE.md')));
   assert.ok(!fs.existsSync(path.join(s.dir, '.github', 'copilot-instructions.md')));
-  assert.ok(fs.existsSync(path.join(s.dir, '.github', 'prompts', 'brief.prompt.md')));
+  assert.ok(fs.existsSync(path.join(s.dir, '.github', 'prompts', 'agenda.prompt.md')));
 });

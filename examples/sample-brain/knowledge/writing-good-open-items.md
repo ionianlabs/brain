@@ -21,6 +21,6 @@ An open item is one line in a project file. A fresh agent should know what to do
 - Start with a verb. "Send the test email", not "Email".
 - One outcome per item. Split anything with an "and".
 - Give a due date only when it is real. A fake date is noise.
-- Say why it waits with `blocked: reason`, so the brief can show it.
+- Say why it waits with `blocked: reason`, so the agenda can show it.
 - When it is done, move it to the log. Do not tick it in place.
-- An item with no owner is fine. It shows up in the brief as unowned.
+- An item with no owner is fine. It shows up in the agenda as unowned.

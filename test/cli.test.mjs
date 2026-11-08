@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { BIN, FIXTURES, TODAY, makeTemplate, tmpDir } from './helpers.mjs';
+import { BIN, FIXTURES, TODAY, makeTemplate, tmpDir, writeTree } from './helpers.mjs';
 
 function brain(args, env = {}) {
   const home = tmpDir('brain-home-');
@@ -38,7 +38,7 @@ test('exit 2: unknown command, missing command, bad option, bad directory', () =
   for (const args of [['frobnicate'], [], ['lint', '--nope'], ['lint', '/tmp/brain-no-such-dir'], ['lint', '--stale-days', 'x'], ['index', '--json']]) {
     const r = brain(args);
     assert.equal(r.status, 2, args.join(' '));
-    assert.match(r.stderr, /^brain: .+\nRun `brain (lint |index )?--help` for usage\.\n$/, args.join(' '));
+    assert.match(r.stderr, /^brain: .+\nRun `brain (lint |index |open )?--help` for usage\.\n$/, args.join(' '));
     assert.doesNotMatch(r.stderr, /Usage:/);
   }
 });
@@ -106,12 +106,74 @@ test('lint does not write files', () => {
   assert.equal(fs.readFileSync(path.join(fixture('index-out-of-date'), 'index.md'), 'utf8'), before);
 });
 
+function openBrain() {
+  const root = tmpDir();
+  const proj = (org, item) => `---\ntype: project\ndescription: Demo.\ntags: [demo]\norg: ${org}\nupdated: 2026-11-08\nphase: active\nfocus: Demo.\n---\n\n# Demo\n\n## Open\n\n${item}\n`;
+  writeTree(root, {
+    'projects/rover.md': proj('client-a', '- [ ] Ship beta (prio: p0, due: 2026-12-01)'),
+    'projects/atlas.md': proj('client-b', '- [ ] Call Sam (prio: p1, owner: Sam)'),
+  });
+  return root;
+}
+
+test('F3.1 open prints ranked lines and the summary', () => {
+  const r = brain(['open', openBrain(), '--today', '2026-11-08']);
+  assert.equal(r.status, 0);
+  assert.equal(r.stdout, 'p0  2026-12-01  rover  Ship beta\np1  -  atlas  Call Sam (owner: Sam)\n2 items: 1 p0, 1 p1, 0 p2, 0 unranked; 1 without due date\n');
+});
+
+test('F3.2 open --project and --org filter', () => {
+  const root = openBrain();
+  const a = brain(['open', root, '--project', 'atlas', '--today', '2026-11-08']);
+  assert.equal(a.stdout, 'p1  -  atlas  Call Sam (owner: Sam)\n1 items: 0 p0, 1 p1, 0 p2, 0 unranked; 1 without due date\n');
+  const b = brain(['open', root, '--org', 'client-a']);
+  assert.match(b.stdout, /^p0  2026-12-01  rover  Ship beta\n1 items:/);
+  const none = brain(['open', root, '--org', 'nope']);
+  assert.equal(none.status, 0);
+  assert.equal(none.stdout, '0 items: 0 p0, 0 p1, 0 p2, 0 unranked; 0 without due date\n');
+});
+
+test('F3.3 open --due-within filters by date', () => {
+  const r = brain(['open', openBrain(), '--due-within', '30', '--today', '2026-11-08']);
+  assert.equal(r.stdout, 'p0  2026-12-01  rover  Ship beta\n1 items: 1 p0, 0 p1, 0 p2, 0 unranked; 0 without due date\n');
+});
+
+test('F3.4 open on an empty folder exits 0 with the full summary', () => {
+  const r = brain(['open', tmpDir()]);
+  assert.equal(r.status, 0);
+  assert.equal(r.stdout, '0 items: 0 p0, 0 p1, 0 p2, 0 unranked; 0 without due date\n');
+});
+
+test('F3.5 open usage errors exit 2', () => {
+  for (const args of [['open', '--due-within', 'x'], ['open', '--due-within=-1'], ['open', '--today', 'soon'], ['open', '/tmp/brain-no-such-dir'], ['open', '--stale-days', '3']]) {
+    const r = brain(args);
+    assert.equal(r.status, 2, args.join(' '));
+    assert.match(r.stderr, /^brain: .+\nRun `brain open --help` for usage\.\n$/, args.join(' '));
+  }
+});
+
+test('open --json has the documented shape', () => {
+  const out = JSON.parse(brain(['open', openBrain(), '--json', '--today', '2026-11-08']).stdout);
+  assert.deepEqual(Object.keys(out), ['items', 'summary']);
+  assert.deepEqual(Object.keys(out.items[0]), ['project', 'org', 'text', 'prio', 'owner', 'due', 'blocked', 'line']);
+  assert.deepEqual(out.items[1], { project: 'atlas', org: 'client-b', text: 'Call Sam', prio: 'p1', owner: 'Sam', due: null, blocked: null, line: 15 });
+  assert.deepEqual(out.summary, { total: 2, p0: 1, p1: 1, p2: 0, unranked: 0, withoutDue: 1 });
+});
+
+test('open --help prints usage', () => {
+  const r = brain(['open', '--help']);
+  assert.equal(r.status, 0);
+  assert.match(r.stdout, /^Usage: brain open \[dir\]/);
+  assert.match(r.stdout, /--due-within N/);
+  assert.match(r.stdout, /\nExample:\n  brain open /);
+});
+
 test('init runs end to end inside a temp home', () => {
   const root = tmpDir();
   const templateDir = makeTemplate(path.join(root, 'template'));
   const r = brain(['init', '--link-skills'], { BRAIN_TEMPLATE_DIR: templateDir, BRAIN_HOME: path.join(root, 'home'), BRAIN_DIR: '', IONIAN_HOME: '' });
   assert.equal(r.status, 0, r.stderr);
   assert.ok(fs.existsSync(path.join(root, 'home', 'Ionian', 'brain', 'AGENTS.md')));
-  assert.ok(fs.lstatSync(path.join(root, 'home', '.claude', 'skills', 'handover')).isSymbolicLink());
+  assert.ok(fs.lstatSync(path.join(root, 'home', '.claude', 'skills', 'sync')).isSymbolicLink());
   assert.match(r.stdout, /Next steps:\n  1\. Open the folder in your editor\./);
 });

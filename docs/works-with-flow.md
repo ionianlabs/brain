@@ -19,7 +19,7 @@ Flow keeps the inbox from flooding: a proposal needs a verbatim quote, decisions
 
 Say "instinct" or run `/brain:instinct`. The skill shows the open lines by project, and you answer per line: accept, edit, reject or duplicate. Accepted to-dos go to the project's `## Open`, decisions to its log, facts to `## Now` or a knowledge note. The skill marks every line and, once a day file is fully reviewed and the day is over, moves it to `_archive/inbox/`.
 
-The brief counts the lines still waiting, so you see them each morning.
+The agenda counts the lines still waiting, so you see them each morning, and `triage` hands day files like these to `instinct`.
 
 ## One rule
 

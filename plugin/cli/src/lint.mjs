@@ -6,6 +6,7 @@ import { loadBrain } from './notes.mjs';
 import { extractLinks, resolveLink } from './links.mjs';
 import { computeIndex, NOTES_START, NOTES_END } from './index.mjs';
 import { isValidDate, isIsoWithOffset, daysBetween, localDate } from './dates.mjs';
+import { PRIOS, ITEM_KEYS, splitOpenItem, fieldMap, openItemLines, prefixProblem } from './items.mjs';
 
 const PHASES = ['active', 'paused', 'done'];
 const STATUSES = ['draft', 'stable', 'deprecated'];
@@ -90,6 +91,8 @@ export function lint(root, options = {}) {
     }
 
     if (f.folder === 'projects') checkBudget(f, add);
+    if (f.folder === 'projects') checkOpenItems(f, add);
+    if (f.folder === 'logs') checkProvenance(f, add);
     if (f.folder === 'knowledge' || f.folder === 'logs') checkProjectKey(f, d, lineOf, add, projectSlugs, orgOf);
 
     checkLinks(f, text(d.org), root, orgOf, add);
@@ -168,6 +171,37 @@ function checkBudget(f, add) {
   }
   if (open > OPEN_LIMIT) {
     add(f.rel, 1, 'warning', 'state/over-budget', `## Open has ${open} items (limit ${OPEN_LIMIT}). Keep the next two weeks in Open and move later items to a plan note.`);
+  }
+}
+
+function checkOpenItems(f, add) {
+  for (const { line, text: raw } of openItemLines(f.fm.bodyLines)) {
+    const split = splitOpenItem(raw);
+    const bad = (msg) => add(f.rel, line, 'warning', 'open-item/malformed', msg);
+    for (const [key, value] of fieldMap(split.fields)) {
+      if (!ITEM_KEYS.includes(key)) {
+        bad(`unknown key "${key}" in the item fields. Use prio, owner, due or blocked.`);
+      } else if (key === 'prio' && !PRIOS.includes(value)) {
+        bad(`prio "${value}" must be ${PRIOS.slice(0, -1).join(', ')} or ${PRIOS[PRIOS.length - 1]}. Use one of the three.`);
+      } else if (key === 'due' && !isValidDate(value)) {
+        bad(`due "${value}" must be a valid YYYY-MM-DD date. Use a date like 2026-12-01.`);
+      }
+    }
+  }
+}
+
+// Top-level log bullets outside code fences must not carry a half-written prefix.
+function checkProvenance(f, add) {
+  let fence = false;
+  for (const { line, text } of f.fm.bodyLines) {
+    if (/^\s*(```|~~~)/.test(text)) { fence = !fence; continue; }
+    if (fence || !text.startsWith('- ')) continue;
+    const p = prefixProblem(text);
+    if (!p) continue;
+    const msg = p.kind === 'name'
+      ? 'prefix Said needs the speaker in parentheses. Write it as Said(Name):.'
+      : `prefix ${p.prefix} has empty parentheses. Name someone inside them or drop the parentheses.`;
+    add(f.rel, line, 'warning', 'provenance/malformed', msg);
   }
 }
 

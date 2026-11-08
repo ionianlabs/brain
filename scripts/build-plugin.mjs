@@ -7,7 +7,7 @@
 // - cli/: a copy of the CLI (bin, src, template, examples), so the skills can
 //   run index, lint and init without npm;
 // - .claude-plugin/plugin.json, from package.json.
-// plugin/hooks/ is written by hand and left alone.
+// plugin/hooks/ and plugin/agents/ are written by hand and left alone.
 // --check writes nothing and exits 1 if plugin/ is out of date.
 
 import fs from 'node:fs';
@@ -32,12 +32,12 @@ function manifest(pkg) {
     name: 'brain',
     displayName: 'Ionian Brain',
     version: pkg.version,
-    description: 'One memory for all agents, in plain markdown. Brief, handover and instinct skills, plus a session-start pointer to your brain folder.',
+    description: 'One memory for all agents, in plain markdown. Agenda, drop, triage, sync and instinct skills, reader and scribe agents, plus a session-start pointer to your brain folder.',
     author: { name: 'Ionian Labs', url: 'https://ionian.dev' },
     homepage: 'https://github.com/ionianlabs/brain',
     repository: 'https://github.com/ionianlabs/brain',
     license: pkg.license,
-    keywords: ['memory', 'markdown', 'agents', 'brief', 'handover', 'instinct'],
+    keywords: ['memory', 'markdown', 'agents', 'agenda', 'drop', 'triage', 'sync', 'instinct'],
   };
 }
 
@@ -91,7 +91,12 @@ export function buildPlugin({ rootDir = ROOT, check = false } = {}) {
   for (const d of GENERATED) {
     for (const rel of listFiles(pluginDir, d).filter((f) => !(f in files))) {
       changed.push(rel);
-      if (!check) fs.rmSync(path.join(pluginDir, rel));
+      if (!check) {
+        fs.rmSync(path.join(pluginDir, rel));
+        // Drop the folder too when that was its last file, so a renamed skill leaves nothing behind.
+        const dir = path.dirname(path.join(pluginDir, rel));
+        if (path.relative(pluginDir, dir) !== d && fs.readdirSync(dir).length === 0) fs.rmdirSync(dir);
+      }
     }
   }
   return changed;

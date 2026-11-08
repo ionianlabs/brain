@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import { lint } from '../src/lint.mjs';
-import { FIXTURES, TODAY, tmpDir, writeTree } from './helpers.mjs';
+import fs from 'node:fs';
+import { FIXTURES, TODAY, copyDir, tmpDir, writeTree } from './helpers.mjs';
 
 const run = (name, options = {}) => lint(path.join(FIXTURES, name), { today: TODAY, ...options });
 
@@ -107,4 +108,92 @@ test('dependency and tool folders are not scanned', async () => {
   const r = lint(root, { today: TODAY });
   assert.deepEqual(r.findings, []);
   assert.ok(!JSON.stringify(computeIndex(root)).includes('Ghost'));
+});
+
+function editedClean(rel, from, to) {
+  const root = tmpDir();
+  copyDir(path.join(FIXTURES, 'clean'), root);
+  const file = path.join(root, rel);
+  const lines = fs.readFileSync(file, 'utf8').split('\n');
+  const at = lines.findIndex((l) => l.startsWith(from));
+  assert.ok(at >= 0, `${from} not found in ${rel}`);
+  lines[at] = to;
+  fs.writeFileSync(file, lines.join('\n'));
+  return { root, line: at + 1 };
+}
+
+const logBullet = (bullet) => editedClean('logs/alpha.md', '- Done: Started', bullet);
+const openItem = (item) => editedClean('projects/alpha.md', '- [ ] Review', item);
+
+test('F1.1 a bare Decision bullet has no finding', () => {
+  assert.deepEqual(lint(logBullet('- Decision: ship weekly').root, { today: TODAY }).findings, []);
+});
+
+test('F1.2 an attributed Said bullet has no finding', () => {
+  assert.deepEqual(lint(logBullet('- Said(Sam): the API freeze moves to March').root, { today: TODAY }).findings, []);
+});
+
+test('F1.3 Said without a name warns once', () => {
+  const { root, line } = logBullet('- Said: the freeze moves');
+  const r = lint(root, { today: TODAY });
+  assert.equal(r.findings.length, 1, JSON.stringify(r.findings));
+  assert.deepEqual([r.findings[0].path, r.findings[0].line, r.findings[0].severity, r.findings[0].rule], ['logs/alpha.md', line, 'warning', 'provenance/malformed']);
+  assert.match(r.findings[0].message, /^prefix Said needs the speaker in parentheses\. Write it as Said\(Name\):\.$/);
+});
+
+test('F1.4 empty parentheses warn once', () => {
+  const { root, line } = logBullet('- Decision(): ship weekly');
+  const r = lint(root, { today: TODAY });
+  assert.equal(r.findings.length, 1, JSON.stringify(r.findings));
+  assert.deepEqual([r.findings[0].path, r.findings[0].line, r.findings[0].severity, r.findings[0].rule], ['logs/alpha.md', line, 'warning', 'provenance/malformed']);
+});
+
+test('provenance/malformed reads log bullets only, outside code fences, one finding per line', () => {
+  for (const bullet of ['- Said (Sam): prose', '- said: prose', '- Noted: prose', '  - Said: nested', '- Inferred(agent-x): fine', '- Done(Ada): fine', '- Said( ): blank']) {
+    const found = lint(logBullet(bullet).root, { today: TODAY }).findings;
+    assert.equal(found.length, bullet.includes('Said( )') ? 1 : 0, bullet);
+  }
+  const { root } = logBullet('```\n- Said: inside a fence\n```');
+  assert.deepEqual(lint(root, { today: TODAY }).findings, []);
+  const proj = editedClean('projects/alpha.md', '- Work is', '- Said: not a log');
+  assert.deepEqual(lint(proj.root, { today: TODAY }).findings, []);
+});
+
+test('F2.1 a valid prio and due have no finding', () => {
+  assert.deepEqual(lint(openItem('- [ ] Call Sam (prio: p1, due: 2026-12-01)').root, { today: TODAY }).findings, []);
+});
+
+const openCases = [
+  ['F2.2', '- [ ] Call Sam (prio: high)', /^prio "high" must be p0, p1 or p2\. Use one of the three\.$/],
+  ['F2.3', '- [ ] Call Sam (due: 2026-13-40)', /^due "2026-13-40" must be a valid YYYY-MM-DD date\. Use a date like 2026-12-01\.$/],
+  ['F2.4', '- [ ] Call Sam (priority: p0)', /^unknown key "priority" in the item fields\. Use prio, owner, due or blocked\.$/],
+];
+for (const [id, item, message] of openCases) {
+  test(`${id} ${item}`, () => {
+    const { root, line } = openItem(item);
+    const r = lint(root, { today: TODAY });
+    assert.equal(r.findings.length, 1, JSON.stringify(r.findings));
+    assert.deepEqual([r.findings[0].path, r.findings[0].line, r.findings[0].severity, r.findings[0].rule], ['projects/alpha.md', line, 'warning', 'open-item/malformed']);
+    assert.match(r.findings[0].message, message);
+  });
+}
+
+test('open-item/malformed warns once per bad field and ignores plain parentheses', () => {
+  const two = lint(openItem('- [ ] Call Sam (prio: P1, due: soon, size: l)').root, { today: TODAY }).findings;
+  assert.deepEqual(two.map((x) => x.rule), ['open-item/malformed', 'open-item/malformed', 'open-item/malformed']);
+  for (const item of ['- [ ] Draft the page (see note)', '- [ ] Draft (Prio: p9)', '- [ ] Wait (blocked: waiting for review, then deploy)', '- [ ] Call (owner: Sam, with Ada, prio: p2)']) {
+    assert.deepEqual(lint(openItem(item).root, { today: TODAY }).findings, [], item);
+  }
+});
+
+test('open-item/malformed checks projects of every phase', () => {
+  const { root } = editedClean('projects/gamma.md', '- [ ] Review', '- [ ] Call Sam (prio: high)');
+  const r = lint(root, { today: TODAY });
+  assert.deepEqual(r.findings.map((x) => [x.path, x.rule]), [['projects/gamma.md', 'open-item/malformed']]);
+});
+
+test('a ranked item still counts once toward the open budget', async () => {
+  const { budget } = await import('../src/lint.mjs');
+  const lines = ['## Open', '- [ ] A (prio: p0, due: 2026-12-01)', '- [ ] B'].map((text, i) => ({ line: i + 1, text }));
+  assert.equal(budget(lines).open, 2);
 });

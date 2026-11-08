@@ -7,6 +7,7 @@ import { parseArgs } from 'node:util';
 import { init, formatInit, resolveHome } from '../src/init.mjs';
 import { computeIndex, writeIndex } from '../src/index.mjs';
 import { lint, formatText } from '../src/lint.mjs';
+import { openItems, formatOpen } from '../src/open.mjs';
 import { isValidDate } from '../src/dates.mjs';
 
 const USAGE = `Usage: brain <command> [options]
@@ -15,6 +16,7 @@ Commands:
   init [dir]    Create a brain from the template (default: ~/Ionian/brain)
   index [dir]   Write the index block and the project notes maps (default: .)
   lint [dir]    Check the brain against the spec (default: .)
+  open [dir]    List open items across projects, ranked (default: .)
 
 Options:
   init:   --example        also copy the fictional sample notes
@@ -22,6 +24,11 @@ Options:
   index:  --check          write nothing, exit 1 if the index is out of date
   lint:   --json           print findings as JSON
           --stale-days N   days before an active project is stale (default 14)
+          --today DATE     treat DATE (YYYY-MM-DD) as today
+  open:   --json           print items and summary as JSON
+          --org SLUG       only projects of this org
+          --project SLUG   only this project
+          --due-within N   only items due within N days, plus overdue ones
           --today DATE     treat DATE (YYYY-MM-DD) as today
   -h, --help               show this help
   -v, --version            show the version
@@ -69,6 +76,23 @@ Flags:
 
 Example:
   brain lint ~/Ionian/brain --stale-days 7`,
+  open: `Usage: brain open [dir] [--json] [--org SLUG] [--project SLUG] [--due-within N] [--today DATE]
+
+List the open items of active and paused projects, ranked by prio, then due
+date, then project. Never writes files.
+
+Arguments:
+  dir              the brain folder (default: .)
+
+Flags:
+  --json           print items and summary as JSON
+  --org SLUG       only projects of this org
+  --project SLUG   only this project
+  --due-within N   only items due within N days, plus overdue ones
+  --today DATE     treat DATE (YYYY-MM-DD) as today
+
+Example:
+  brain open ~/Ionian/brain --due-within 7`,
 };
 
 const OPTIONS = {
@@ -80,12 +104,16 @@ const OPTIONS = {
   json: { type: 'boolean' },
   'stale-days': { type: 'string' },
   today: { type: 'string' },
+  org: { type: 'string' },
+  project: { type: 'string' },
+  'due-within': { type: 'string' },
 };
 
 const ALLOWED = {
   init: ['example', 'link-skills'],
   index: ['check'],
   lint: ['json', 'stale-days', 'today'],
+  open: ['json', 'org', 'project', 'due-within', 'today'],
 };
 
 function usageError(message) {
@@ -163,6 +191,16 @@ if (command === 'init') {
     process.stdout.write(status === 'ok' ? 'index.md is already up to date\n' : 'index.md updated\n');
     for (const rel of projects) process.stdout.write(`${rel} notes map updated\n`);
   }
+} else if (command === 'open') {
+  const dir = existingDir(rest[0]);
+  let dueWithin;
+  if (values['due-within'] !== undefined) {
+    if (!/^\d+$/.test(values['due-within'])) usageError('--due-within needs a whole number');
+    dueWithin = Number(values['due-within']);
+  }
+  if (values.today !== undefined && !isValidDate(values.today)) usageError('--today needs a date as YYYY-MM-DD');
+  const result = openItems(dir, { org: values.org, project: values.project, dueWithin, today: values.today });
+  process.stdout.write(values.json ? `${JSON.stringify(result)}\n` : `${formatOpen(result)}\n`);
 } else {
   const dir = existingDir(rest[0]);
   let staleDays;

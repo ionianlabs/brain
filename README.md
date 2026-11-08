@@ -13,15 +13,15 @@ Every agent chat starts at zero. The context lives in your head, in old chats an
 
 ## Quickstart.
 
-Add the plugin to your agent. It brings the `brief`, `handover` and `instinct` skills to every repo, and tells each new session where your brain is.
+Add the plugin to your agent. It brings the `agenda`, `drop`, `triage`, `sync` and `instinct` skills, and the `reader` and `scribe` agents, to every repo, and tells each new session where your brain is.
 
 | Agent | Install | Run |
 |---|---|---|
-| Claude Code | `/plugin marketplace add ionianlabs/brain`, then `/plugin install brain@ionianlabs` | `/brain:brief` |
-| Copilot CLI | `copilot plugin marketplace add ionianlabs/brain`, then `copilot plugin install brain@ionianlabs` | `/brief` |
-| Copilot in VS Code | Add `ionianlabs/brain` to `chat.plugins.marketplaces`, then install `brain` from **Chat: Plugins** | `/brain:brief` |
+| Claude Code | `/plugin marketplace add ionianlabs/brain`, then `/plugin install brain@ionianlabs` | `/brain:agenda` |
+| Copilot CLI | `copilot plugin marketplace add ionianlabs/brain`, then `copilot plugin install brain@ionianlabs` | `/agenda` |
+| Copilot in VS Code | Add `ionianlabs/brain` to `chat.plugins.marketplaces`, then install `brain` from **Chat: Plugins** | `/brain:agenda` |
 
-Then say "brief". With no brain yet, the agent offers to create one in `~/Ionian/brain`. The plugin carries the CLI, so there is nothing else to install. Ask for the sample projects if you want to look around first.
+Then say "agenda". With no brain yet, the agent offers to create one in `~/Ionian/brain`. The plugin carries the CLI, so there is nothing else to install. Ask for the sample projects if you want to look around first.
 
 Without the plugin, or for any other agent, clone the repo and run the CLI from it:
 
@@ -31,9 +31,9 @@ node brain/bin/brain.mjs init            # creates ~/Ionian/brain
 node brain/bin/brain.mjs init --example  # same, with sample projects
 ```
 
-Then open your agent in `~/Ionian/brain` and say "brief", or "Read skills/brief/SKILL.md and follow it."
+Then open your agent in `~/Ionian/brain` and say "agenda", or "Read skills/agenda/SKILL.md and follow it."
 
-At the end of a session, say "handover".
+At the end of a session, say "sync". To capture a thought from any chat, say "drop this: …", and "triage" places it later.
 
 Details, updates and the routes without the plugin are in [The Brain plugin](https://github.com/ionianlabs/brain/blob/main/docs/plugin.md). The folder is `$IONIAN_HOME/brain` if you set `IONIAN_HOME`, else `~/Ionian/brain`. For a brain anywhere else, set `BRAIN_DIR`.
 
@@ -43,7 +43,7 @@ Node 20 or newer is the only requirement.
 
 Copy `templates/project.md` to `projects/<slug>.md` and `templates/log.md` to `logs/<slug>.md`, fill in the frontmatter, then run `brain index`. Or ask your agent to start a project. `AGENTS.md` has the steps.
 
-`lint` warns when the index is stale, so run `index` after you add notes. The handover does both.
+`lint` warns when the index is stale, so run `index` after you add notes. The sync does both.
 
 For a walk through one full day, read [A day with Brain](https://github.com/ionianlabs/brain/blob/main/docs/a-day-with-brain.md).
 
@@ -60,7 +60,7 @@ Brain also works next to Ionian Harness. See [Works with Ionian Harness](https:/
   inbox/           quick captures, triaged at the next session
   knowledge/       durable reference notes
   templates/       note templates
-  skills/          example skills: brief, handover, instinct
+  skills/          example skills: agenda, drop, triage, sync, instinct
   .confidential/   notes agents leave alone (gitignored)
 ```
 
@@ -72,7 +72,7 @@ Read at the start, write at the end.
 
 At the start, the agent reads `AGENTS.md`, then `index.md`, then the state file of the project at hand. It also checks the inbox. At the end, it updates the state file, moves done items and decisions to the log, sets `updated`, rebuilds the index and runs lint.
 
-I will be honest. Reading is easy. Writing is the habit that matters, and it is the part people skip. The `handover` skill exists to make it cheap: one word, and the agent does the bookkeeping.
+I will be honest. Reading is easy. Writing is the habit that matters, and it is the part people skip. The `sync` skill exists to make it cheap: one word, and the agent does the bookkeeping.
 
 ## What a project file looks like.
 
@@ -87,21 +87,21 @@ A state file describes the present. It never holds history. It has four sections
 
 Owner and due date are optional. Done items move to the log, which is a list of dated entries, newest first, with `Decision:` and `Done:` bullets. That split is why the state file stays short enough to read in full every time. See the [sample brain](https://github.com/ionianlabs/brain/blob/main/examples/sample-brain/index.md) for a filled example.
 
-## What the brief gives you.
+## What the agenda gives you.
 
-Say "brief" and the agent reports what needs you today. It reads, and it never edits.
+Say "agenda" and the agent reports what needs you now: at most 5 items under "Needs you" and 20 lines in total, ranked across projects, with everything else folded into counts. Say "agenda everything" for the full report. It reads, and it never edits.
 
-The report is grouped by org, with `personal` last. Each org gets these sections:
+The default report has these parts:
 
-- Overdue items.
-- Items due in the next 7 days.
-- Blocked items.
-- Who to talk to: the owners of those items, plus People whose entry says when to talk to them.
-- What changed in the last 7 days.
-- Captures waiting in the inbox.
-- Hygiene: the lint result.
+- A header: `N need you, M held back`.
+- Needs you: p0 items, plus overdue and due-today items. A line folds the rest: "and K more need you — say more".
+- Coming up: p0 and p1 items due in the next 3 days.
+- Blocked items, with who to talk to.
+- Captures waiting in the inbox, as a count. Say "triage" to place them.
+- One hygiene line, only when lint has something to say.
+- One honesty line with the totals of what was held back.
 
-Each org ends with one line, "No due date: N open items".
+"agenda everything" prints the exhaustive report, grouped by org with `personal` last: overdue, due in 7 days, blocked, who to talk to, what changed, inbox and hygiene, and "No due date: N open items".
 
 ## What Brain adds on top of OKF.
 
@@ -111,15 +111,15 @@ Each org ends with one line, "No due date: N open items".
 | **State and history split** | A short current file per project (about 300 words plus open items), project notes read on demand, and an append-only log. | Reads stay cheap and nothing is lost. |
 | **Boundaries** | An `org` key keeps clients apart. `.confidential/` holds notes agents leave alone. | Safe across several clients. OKF has no access control. |
 | **Capture path** | `inbox/`, triaged at the next session. | Aimed at the real bottleneck, which is writing. |
-| **Daily payoff** | `brief` and `handover` example skills. | You feel the value the same day. |
+| **Daily payoff** | `agenda`, `drop`, `triage` and `sync` example skills. | You feel the value the same day. |
 | **Hygiene** | `brain lint` checks staleness, broken links, tag near-duplicates, cross-org links and OKF conformance. | The folder stays trustworthy. |
 
 A brain stays a valid OKF v0.2 bundle, so any OKF tool can read it.
 
 ## Where it works.
 
-- **Claude Code.** The plugin, or `AGENTS.md` (read natively) and the `brief` and `handover` skills in the brain folder. Without the plugin, `init --link-skills` symlinks the skills into `~/.claude/skills/`, so they work in every project. Existing skills with the same name are left alone.
-- **GitHub Copilot.** The plugin, in Copilot CLI and in VS Code. Without it, `AGENTS.md` (read natively) and two prompt files, `/brief` and `/handover`. See [docs/copilot.md](https://github.com/ionianlabs/brain/blob/main/docs/copilot.md) to use them from inside a work repo.
+- **Claude Code.** The plugin, or `AGENTS.md` (read natively) and the `agenda`, `drop`, `triage` and `sync` skills in the brain folder. Without the plugin, `init --link-skills` symlinks the skills into `~/.claude/skills/`, so they work in every project. Existing skills with the same name are left alone.
+- **GitHub Copilot.** The plugin, in Copilot CLI and in VS Code. Without it, `AGENTS.md` (read natively) and prompt files such as `/agenda` and `/sync`. See [docs/copilot.md](https://github.com/ionianlabs/brain/blob/main/docs/copilot.md) to use them from inside a work repo.
 - **Any agent that can read a file.** Point it at `AGENTS.md`.
 
 ## CLI.

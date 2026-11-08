@@ -15,3 +15,4 @@ project: <project-slug>
 
 - Decision: <what was decided and why>
 - Done: <what was finished>
+- Said(<Name>): <what someone else stated>

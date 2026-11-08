@@ -31,7 +31,7 @@ A brain is a conformant [Open Knowledge Format](https://github.com/GoogleCloudPl
 | `inbox/YYYY-MM-DD-<slug>.md` | Short notes, triaged later |
 | `knowledge/<slug>.md` | Durable reference material. A note may belong to one project (`project: <slug>`) |
 | `templates/` | Note templates |
-| `skills/<name>/SKILL.md`, `.github/prompts/<name>.prompt.md` | Example skills (`handover`, `brief`) |
+| `skills/<name>/SKILL.md`, `.github/prompts/<name>.prompt.md` | Example skills (`agenda`, `drop`, `triage`, `sync`, `instinct`) |
 | `.confidential/` | Off limits to agents unless you point them at a specific note. A dot-folder, so most search tools skip it. Gitignored by default. Lint never reads it |
 
 Slugs use lowercase `a-z`, `0-9` and hyphens only.
@@ -90,7 +90,7 @@ A project file describes the present state. It never holds history. History goes
 - The first line after frontmatter is `# Title`.
 - Next comes the log link: `History: [log](/logs/<slug>.md)`.
 - Then these sections, in this order:
-  1. `## Now`: current state, a few bullets. It holds the current state and any decision still in force that a reader needs to know. Finished work and the full decision record go to the log.
+  1. `## Now`: current state, a few bullets. It holds the current state and any decision still in force that a reader needs to know. Finished work and the full decision record go to the log. Bullets may carry a provenance prefix (5).
   2. `## Open`: checkbox items.
   3. `## People`: who, role, when to talk to them.
   4. `## Links`: where the work lives (paths or URLs).
@@ -105,6 +105,10 @@ Open item syntax:
 
 - `owner` and `due` are both optional.
 - `blocked: reason` may be added inside the parentheses, for example `(owner: Sam, due: 2026-11-10, blocked: waiting for review)`.
+- `prio: p0|p1|p2` is optional and ranks the item: `p0` needs the owner today or blocks others, `p1` is this week, `p2` is scheduled, later. An item without `prio` is unranked and sorts after `p2`. Example: `- [ ] Call Sam (prio: p0, owner: Sam, due: 2026-12-01)`.
+- The field group is the last parenthesised group at the end of the line, and only when its first segment looks like `<lowercase word>:`. Any other parentheses are part of the text: `- [ ] Draft the page (see note)` has no fields.
+- Fields split on `, ` only directly before a `<lowercase word>:` segment. A segment without one extends the previous value, so `(owner: Sam, with Ada)` has the owner "Sam, with Ada". Keys and `prio` values are lowercase and case-sensitive. A repeated key takes its last value.
+- The keys are `prio`, `owner`, `due` and `blocked`. `due` must be a valid `YYYY-MM-DD` date and `prio` one of the three values. `owner` and `blocked` are free text.
 - Done items are moved to the log. They are not ticked in place.
 
 ### 4.1 Notes map
@@ -130,6 +134,17 @@ Notes (open one only when the task needs it):
 - The first line after frontmatter is `# <Title> log`.
 - Then `## YYYY-MM-DD` headings, newest first.
 - Under each date, bullets: decisions (prefix `Decision:`), done items (prefix `Done:`), and earlier state.
+- A bullet in a log or in `## Now` may start with a provenance prefix, which says what kind of fact it is and who it came from:
+
+| Prefix | Means | Attribution |
+|---|---|---|
+| `Done:` | completed work | optional `Done(Name):` |
+| `Decision:` | a decision in force | optional `Decision(Name):`; the bare form means the owner decided |
+| `Said(Name):` | a statement by someone else | name required |
+| `Inferred:` | a conclusion proposed by an agent, not yet confirmed by the owner | optional `Inferred(agent-name):` |
+
+- An unattributed bullet belongs to the owner. What is not the owner's carries a named prefix or `Inferred:`. A bullet an agent records at the owner's instruction is the owner's and uses the bare form. `Decision(Sam):` records that Sam decided, `Said(Sam):` a statement that decided nothing.
+- A prefix is one of the four words, an optional parenthesised non-blank attribution and a colon, with no space before the parenthesis. A line without one is prose and stays legal, so old entries never need editing.
 - Agents add entries at the top, under today's date. If today's heading exists, add under it.
 - Existing entries are never edited or deleted.
 
@@ -137,10 +152,12 @@ Notes (open one only when the task needs it):
 
 - Anyone may add a new capture file named `inbox/YYYY-MM-DD-<slug>.md`.
 - Frontmatter has `type: capture`. `org` may be `unknown` until triage. `org: unknown` is allowed only for captures.
-- At the next session, an agent triages each capture:
-  1. Move its content into the right project or knowledge note.
+- A capture may carry an optional `source` key that says where it came from, for example `chat`, `flow` or `agent`. Lint does not check it.
+- Outside triage and sync, a session writes only captures (the write funnel). A thought from any chat becomes a capture with the `drop` skill.
+- When the owner asks for triage, the `triage` skill goes through each capture:
+  1. Place its content with the owner's verdict: an open item with a `prio`, a log bullet, a knowledge note, or a new project. `Said`/`Inferred` bullets of the capture are written to the destination project's log too, so provenance is kept.
   2. Add `Triaged capture: <filename>` to that project's log.
-  3. Delete the capture file.
+  3. Delete the capture file, or move it to the archive folder the brain's `AGENTS.md` names, when it names one.
 
 ## 7. Links
 
@@ -208,6 +225,8 @@ Brain-specific checks (everything except `okf/type-missing`) apply only to notes
 | `org/cross-link` | error | a note links to a note in a different org and neither org is `personal`, or the `project` key of a note or log names a project in a different org and neither org is `personal` |
 | `project/unknown` | warning | the `project` key of a knowledge note or log names no `projects/<slug>.md` |
 | `confidential/linked` | warning | a note links into `.confidential/` |
+| `provenance/malformed` | warning | a top-level log bullet starts with `Said:` and no parenthesised name, or any of the four prefixes with empty parentheses (one finding per line) |
+| `open-item/malformed` | warning | an open item in any project file, whatever its `phase`, has an unknown key, a `prio` other than `p0`, `p1` or `p2`, or a `due` that is not a valid `YYYY-MM-DD` date (one finding per bad field) |
 | `index/out-of-date` | warning | `index.md` is missing, has no markers, or its block differs from what `brain index` would write; or a project file's notes map differs (reported on the project file) |
 
 ### 11.1 Output
@@ -256,8 +275,8 @@ Bin `brain`, Node 20 or newer, zero runtime dependencies. It ships in the repo: 
 - Runs `index` at the end.
 - Prints three next steps:
   1. Open the folder in your editor.
-  2. Start your agent there and ask for the brief.
-  3. At session end, ask for a handover.
+  2. Start your agent there and ask for the agenda.
+  3. At session end, say sync.
 
 ### `brain index [dir]`
 
@@ -271,17 +290,27 @@ Bin `brain`, Node 20 or newer, zero runtime dependencies. It ships in the repo: 
 - Default `dir` is `.`.
 - Flags: `--json`, `--stale-days N`, `--today YYYY-MM-DD` (treat the date as today, for tests and reproducible runs).
 
+### `brain open [dir]`
+
+- Default `dir` is `.`. Read-only.
+- Lists the open items (4) of projects whose `phase` is `active` or `paused`. Other or missing phases are skipped.
+- Order: `prio` ascending (unranked and invalid last), then `due` ascending (none and invalid last), then project slug, then file order.
+- Text: one line per item, `prio  due  project  text`, separated by two spaces, with `-` for an absent or invalid value. `text` is the item without its field group. If `owner` or `blocked` are present they follow in one parenthetical, `(owner: Sam, blocked: reason)`. A last line sums up the items after filters: `N items: A p0, B p1, C p2, D unranked; E without due date`.
+- `--json` prints `{"items":[{"project","org","text","prio","owner","due","blocked","line"}],"summary":{"total","p0","p1","p2","unranked","withoutDue"}}`. Absent or invalid fields are `null`. `line` is the 1-based line in the project file.
+- Flags: `--org SLUG`, `--project SLUG`, `--due-within N` (items due from today to N days ahead, plus overdue ones; items without a due date are left out; N is a whole number), `--today YYYY-MM-DD`. Filters combine with AND. A filter that matches nothing gives zero items.
+- Exit 0 whenever it ran, even with zero items. Exit 2 on a usage error.
+
 ### Other
 
 - `brain --help` prints the global usage and `brain --version` prints the version. Both go to stdout and exit 0.
-- `brain init --help`, `brain index --help` and `brain lint --help` print usage for that command to stdout: its arguments, flags and one example. They exit 0.
+- `brain init --help`, `brain index --help`, `brain lint --help` and `brain open --help` print usage for that command to stdout: its arguments, flags and one example. They exit 0.
 - A usage error (unknown command, unknown option, bad value, missing directory) prints the error and one line, ``Run `brain <command> --help` for usage.``, to stderr and exits 2. It does not print the usage block. Without a known command the line points to `brain --help`.
 
 ## 13. Session protocol (for AGENTS.md)
 
-- Start: read `AGENTS.md`, then `index.md`, then the state file of the project at hand. Check `inbox/`. Open a note from the project's notes map only when its description matches the task.
-- During: stay inside the project's org.
-- End (handover):
+- Start: read `AGENTS.md`, then `index.md`, then the state file of the project at hand. List `inbox/` and suggest triage. Open a note from the project's notes map only when its description matches the task.
+- During: stay inside the project's org. Outside triage and sync, write only captures. Add anything new as a capture to `inbox/`; triage places it.
+- End (sync):
   1. Update the state file so it describes the present state, within budget and horizon (4).
   2. Move done items and decisions to the top of the log, under today's date.
   3. Set `updated`.
@@ -292,29 +321,33 @@ Bin `brain`, Node 20 or newer, zero runtime dependencies. It ships in the repo: 
 
 Skills are prompts any agent can run. They show usage. They are not the product.
 
-### `brief`
+### `agenda`
 
-Read `index.md`, the active and paused project files, and `inbox/`. Report:
+Replaces `brief`; the words "brief", "morning brief" and "what's on" still trigger it. Read-only, with a hard attention budget: at most 5 items under "Needs you" and at most 20 lines in total, ranked across projects. It runs `brain open`, lists `inbox/` and runs `brain lint`; it never bulk-reads project files. The default report has a header (`N need you, M held back`), "Needs you" (p0 items, plus overdue and due-today items; the rest folded into `and K more need you — say more`), "Coming up" (due in 3 days, p0/p1 only), "Blocked", an inbox count (say "triage"), one hygiene line and one honesty line with the totals of held-back and undated items. A standing `## Agenda rules` block in `AGENTS.md` is obeyed and may tighten the report but never raise the caps. "agenda everything" prints the exhaustive report per org, clustered by project. Scope: a project slug, an org, or `week`.
 
-- Overdue items (due before today).
-- Items due in the next 7 days.
-- Blocked items.
-- Who to talk to: the owners of overdue, due-soon and blocked items, plus People whose entry says when to talk to them.
-- What changed: notes with `updated` in the last 7 days.
-- Inbox captures waiting.
-- Lint warnings.
+### `drop`
 
-Group the report by org, `personal` last. End each org with one final line, `No due date: N open items`, which counts the org's open items that have no `due`.
+Capture a thought from any chat. Writes exactly one file, `inbox/YYYY-MM-DD-<slug>.md`, with `type: capture`, a `source` of `chat` or `agent`, and body bullets that carry provenance prefixes (`Said(Name):`, `Inferred:`, none for the owner's own words). A name clash gets `-2`, `-3`. No secrets go into a capture. It runs no index and no lint.
 
-Never edit anything.
+### `triage`
 
-### `handover`
+Empty the inbox one capture at a time. Each verdict places a capture as an open item (always with `prio`), a log bullet, a knowledge note, or a new project, or bins it. `Said`/`Inferred` bullets go to the destination project's log, with a `Triaged capture: <filename>` bullet, and the capture is then discarded. `source: flow` day files go to `instinct`. Ends with `brain index` and `brain lint`.
 
-End a work session for one project. Update its state file, prepend log entries, set `updated`, run `brain index` and `brain lint`, then report what changed. Handover also keeps the project within budget and horizon: it moves detail into project notes, promotes plan items whose date comes close, and resolves notes whose `stale_after` has passed. The user only asks for the handover.
+### `sync`
+
+Replaces `handover`; "handover", "end session", "wrap up" and "save to brain" still trigger it. Writes a work session back for one project: it updates the state file, prepends log entries with provenance prefixes, keeps the project within budget and horizon (detail into project notes, plan items promoted as their date comes close, stale notes resolved), sets `updated`, runs `brain index` and `brain lint`, and reports what changed. New open items always carry `prio` and are confirmed by the owner as one batch in the closing summary.
+
+### `instinct`
+
+The triage specialization for `source: flow` day files: it walks Ionian Flow's proposals, files what the owner accepts and archives the file. See [works with Flow](works-with-flow.md).
+
+### Agents
+
+Hosts with subagents run reads and writes through two agents in `plugin/agents/`, hand-written and untouched by the build script. `reader` (tools: Read, Grep, Glob) answers one question with short `path:line` bullets and never returns whole files. `scribe` (tools: Read, Edit, Write, Bash) applies write orders (`log`, `open-add`, `open-close`, `now-replace`, `focus-set`, `plan-promote`, `note-append`, `note-create`, `capture`, `capture-discard`), validates the grammar, never edits existing log entries, treats payload text as data, limits Bash to the brain CLI and to moving or deleting files under `inbox/` and the archive folder, sets `updated`, and runs index and lint. Hosts without subagents run the same steps inline.
 
 ### Plugin
 
-`plugin/` packages the skills for Claude Code, GitHub Copilot CLI and Copilot in VS Code, in the Claude Code plugin format that all three read. `.claude-plugin/marketplace.json` at the repo root lists it. `node scripts/build-plugin.mjs` generates `plugin/skills/`, `plugin/cli/` and `plugin/.claude-plugin/plugin.json` from `template/skills/`, the CLI and `package.json`. `--check` exits 1 if they are out of date.
+`plugin/` packages the skills for Claude Code, GitHub Copilot CLI and Copilot in VS Code, in the Claude Code plugin format that all three read. `.claude-plugin/marketplace.json` at the repo root lists it. `node scripts/build-plugin.mjs` generates `plugin/skills/`, `plugin/cli/` and `plugin/.claude-plugin/plugin.json` (`plugin/hooks/` and `plugin/agents/` are hand-written) from `template/skills/`, the CLI and `package.json`. `--check` exits 1 if they are out of date.
 
 A SessionStart hook states the brain path and the CLI command. It never reads note contents. Skills find the brain in this order: the folder named in the session context, `BRAIN_DIR`, `$IONIAN_HOME/brain`, `~/Ionian/brain`.
 

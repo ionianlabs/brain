@@ -22,7 +22,7 @@ If any other file disagrees with this one, this file wins.
 | `inbox/YYYY-MM-DD-<slug>.md` | Quick captures, triaged later |
 | `knowledge/<slug>.md` | Reference material. With `project: <slug>` it belongs to one project |
 | `templates/` | Starting points for new notes |
-| `skills/`, `.github/prompts/` | Example skills: `brief` and `handover` |
+| `skills/`, `.github/prompts/` | Example skills: `agenda`, `drop`, `triage`, `sync` and `instinct` |
 | `.confidential/` | Off limits. See Confidential |
 
 Slugs use lowercase `a-z`, `0-9` and hyphens only.
@@ -34,16 +34,16 @@ Slugs use lowercase `a-z`, `0-9` and hyphens only.
 1. Read this file.
 2. Read `index.md`.
 3. Read the state file of the project at hand.
-4. List `inbox/`. Triage any captures (see Inbox).
+4. List `inbox/` and suggest triage.
 5. Open a note from the project's notes map only when its description matches the task. Do not read all of them.
 
 ### During
 
 1. Stay inside the org of the project you work on.
-2. Put new facts where they belong. Do not park them in chat.
-3. Add a capture to `inbox/` when you do not know where something goes.
+2. Outside triage and sync, write only captures.
+3. Add anything new as a capture to `inbox/`; triage places it.
 
-### End (handover)
+### End (sync)
 
 1. Update the project's state file so it describes the present. Keep it within budget and horizon (see Writing rules).
 2. Move done items and decisions to the top of the log, under today's date.
@@ -72,7 +72,7 @@ Notes live in `projects/`, `logs/`, `inbox/` and `knowledge/`. Each note carries
 |---|---|---|
 | `project` | `projects/` | `phase`: `active`, `paused` or `done`. `focus`: one line on what matters now |
 | `log` | `logs/` | `project`: the slug of its project |
-| `capture` | `inbox/` | Optional `source`: where it came from, for example `flow` for Ionian Flow's Instinct. `org: unknown` is allowed until triage |
+| `capture` | `inbox/` | Optional `source`: where it came from, for example `chat` or `agent` for a `drop`, or `flow` for Ionian Flow's Instinct. `org: unknown` is allowed until triage |
 | `note` | `knowledge/` | none. Optional `project`: the slug of the one project it belongs to |
 
 Optional keys keep their meaning: `status` is `draft`, `stable` or `deprecated`. `generated`, `verified` and `stale_after` are allowed and preserved. Use only simple YAML: scalars, inline or block lists, one level of nesting.
@@ -88,7 +88,7 @@ Copy a starting point from `templates/`.
 - A project file has this shape: `# Title`, then a `History:` line that links to the log (`/logs/<slug>.md`), then `## Now`, `## Open`, `## People`, `## Links` in that order.
 - History goes to the log. Add entries at the top, under today's date. If today's heading exists, add under it.
 - Never edit or delete existing log entries.
-- A log starts with `# <Title> log`, then `## YYYY-MM-DD` headings, newest first. Prefix bullets with `Decision:` or `Done:`.
+- A log starts with `# <Title> log`, then `## YYYY-MM-DD` headings, newest first. Prefix bullets with `Decision:` or `Done:`. Say whose fact it is: a bare prefix is the owner's, `Said(Sam): the freeze moves to March` is someone else's statement, `Inferred:` is an agent's own conclusion.
 - One fact lives in one place. Link to it. Do not copy it.
 - Use root-relative links, for example `/projects/example.md`. Anchors are fine.
 - Do not create files named `log.md`. Logs live in `logs/<slug>.md`.
@@ -101,7 +101,7 @@ Open items sit under `## Open` in the project file:
 - [ ] Text (owner: Name, due: YYYY-MM-DD)
 ```
 
-- `owner` and `due` are optional.
+- `owner` and `due` are optional. `prio: p0|p1|p2` is optional too (`p0` today or blocking others, `p1` this week, `p2` later), for example `(prio: p0, owner: Sam, due: 2026-12-01)`.
 - Add `blocked: reason` inside the parentheses when something is stuck, for example `(owner: Sam, due: 2026-11-10, blocked: waiting for review)`.
 - Do not tick done items. Move them to the log as `Done:` entries.
 - One line per item. Put the detail in a note and link it.
@@ -112,6 +112,8 @@ Open items sit under `## Open` in the project file:
 `brain index` writes a block between `<!-- brain:notes start -->` and `<!-- brain:notes end -->` into each project file that has notes, before `## Now`. Never edit it by hand.
 
 ## Starting a new project
+
+Only triage's new-project verdict, or the owner deliberately following these steps, creates a project.
 
 1. Pick a slug: lowercase `a-z`, `0-9` and hyphens.
 2. Copy `templates/project.md` to `projects/<slug>.md` and `templates/log.md` to `logs/<slug>.md`.
@@ -134,15 +136,23 @@ The reason: one brain may hold work for several employers or clients. Mixing the
 
 ## Inbox
 
-Anyone may add a capture: `inbox/YYYY-MM-DD-<slug>.md` with `type: capture`. At the next session, for each capture:
+Anyone may add a capture: `inbox/YYYY-MM-DD-<slug>.md` with `type: capture`. Say `drop this: …` in any chat to add one. When the owner asks for triage, for each capture:
 
 1. Move its content into the right project or knowledge note. Set the right `org` there.
-2. Add `Triaged capture: <filename>` to that project's log, under today's date.
+2. Add `Triaged capture: <filename>` to that project's log, under today's date. Keep `Said`/`Inferred` bullets of the capture in that log too.
 3. Delete the capture file.
 
 If you cannot tell where it belongs, ask the user. Do not guess an org.
 
 An Instinct day file (`inbox/YYYY-MM-DD-instinct.md`, `source: flow`) is the exception: review it with the `instinct` skill, and archive it to `_archive/inbox/` instead of deleting it. Ionian Flow reads the archived files to measure its precision.
+
+## Agenda rules
+
+The `agenda` skill reads this block and obeys it. Rules may tighten the report. They never raise its caps of 5 items under "Needs you" and 20 lines in total.
+
+- Projects with `phase: done` never surface.
+- Anything already moved to a log never surfaces.
+- Name who to talk to for each blocked item.
 
 ## Index
 
@@ -169,3 +179,4 @@ Lint exits 1 on errors. Warnings are allowed, but read them.
 - Never put history in a project file.
 - Never write secrets, passwords or tokens into any note.
 - Never overwrite a note you have not read.
+- Never let agent-side memory override the brain; propose a new connection as a capture marked Inferred:, never by editing notes.

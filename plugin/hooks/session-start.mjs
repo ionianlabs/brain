@@ -31,12 +31,12 @@ export function context(dir, cli = CLI) {
   if (fs.existsSync(path.join(dir, 'AGENTS.md'))) {
     return (
       `Ionian Brain: the user's brain folder is at ${dir}. It holds their project state, open items and notes as markdown. ` +
-      `When the task touches those, or the user asks for a brief or a handover, read ${dir}/AGENTS.md first and follow it. ${run}`
+      `When the task touches those, or the user asks for an agenda or a sync, read ${dir}/AGENTS.md first and follow it. ${run}`
     );
   }
   return (
     `Ionian Brain is installed, but no brain folder was found at ${dir}. ` +
-    `If the user asks for a brief or a handover, offer to create one with: ${cli} init "${dir}". ` +
+    `If the user asks for an agenda or a sync, offer to create one with: ${cli} init "${dir}". ` +
     `The BRAIN_DIR environment variable sets another folder, and IONIAN_HOME moves the shared Ionian home. ${run}`
   );
 }

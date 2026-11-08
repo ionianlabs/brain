@@ -12,8 +12,8 @@ This folder is your memory in plain markdown. Every agent you use reads and writ
 ## Start
 
 1. Open this folder in your editor.
-2. Start your agent here and ask for the brief.
-3. At the end of a session, ask for a handover.
+2. Start your agent here and ask for the agenda.
+3. At the end of a session, say `sync`. To capture a thought from any chat, say `drop this: …`, and `triage` places it later.
 
 ## Where things go
 

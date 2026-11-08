@@ -9,7 +9,7 @@ project: harbor-bakery-ordering
 
 # Harbor Bakery ordering plan
 
-Work beyond the next two weeks. Handover moves an item into the project's Open list when its date comes close.
+Work beyond the next two weeks. Sync moves an item into the project's Open list when its date comes close.
 
 ## After launch, from 2026-11-23
 

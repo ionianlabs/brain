@@ -1,7 +1,7 @@
 ---
 name: instinct
 type: skill
-description: Review what Ionian Flow's Instinct proposed for the brain. Use when the user says "instinct", "review instinct" or "triage instinct", or when the brief shows Instinct items waiting. Walks through each proposed to-do, decision and fact, files the accepted ones into the right project, marks every line and archives the file.
+description: Review what Ionian Flow's Instinct proposed for the brain. Use when the user says "instinct", "review instinct" or "triage instinct", or when the agenda shows Instinct items waiting. Walks through each proposed to-do, decision and fact, files the accepted ones into the right project, marks every line and archives the file.
 ---
 
 # Instinct
