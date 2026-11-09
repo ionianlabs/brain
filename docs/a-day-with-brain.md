@@ -11,19 +11,30 @@ This is one ordinary day, using the [sample brain](../examples/sample-brain/inde
 
 ## 08:30, the agenda
 
-I open my agent in `~/Ionian/brain` and say "agenda". It asks the CLI for the open items, lists the inbox and runs lint. It edits nothing, and it prints at most 5 items and 20 lines. This is what comes back.
+I open my agent in `~/Ionian/brain` and say "agenda". It reads the Open section of each project, lists the inbox and edits nothing. It shows at most 5 items per table. This is what comes back.
 
 ```
-Agenda 2026-11-02: 2 need you, 5 held back
-Needs you
-- p0  [harbor-bakery-ordering] Confirm the cutoff time for next-day orders (Mara, due 2026-10-30)
-- p1  [tidewater-library] Approve the homepage layout (Lena, due 2026-11-06)
-Coming up
-- p1  [harbor-bakery-ordering] Send a test order confirmation through staging (Theo, 2026-11-04)
-Blocked
-- [tidewater-library] Migrate the event calendar: waiting for the old site export (talk to Jonas)
-Inbox: 2 captures waiting, say triage
-Held back: 5 items with no line here, 2 of them unranked or undated
+## Agenda, Mon 2 Nov
+
+**2 need you** · 1 coming up · 1 blocked · inbox: 2 captures
+
+### Needs you
+| Prio | What | Project | Due | Talk to |
+|---|---|---|---|---|
+| **p0** | Confirm the cutoff time for next-day orders | harbor-bakery-ordering | **overdue** since 2 Nov | Mara |
+| p1 | Approve the homepage layout | tidewater-library | Fri 6 Nov | Lena |
+
+### Coming up
+| Prio | What | Project | Due | Talk to |
+|---|---|---|---|---|
+| p1 | Send a test order confirmation through staging | harbor-bakery-ordering | Wed 4 Nov | Theo |
+
+### Blocked
+| What | Project | Waiting for | Talk to |
+|---|---|---|---|
+| Migrate the event calendar | tidewater-library | the old site export | Jonas |
+
+**Next:** message Mara about the cutoff today.
 ```
 
 I message Mara about the cutoff. That is the one item I cannot move myself. If I want the long version, I say "agenda everything".
@@ -74,13 +85,13 @@ And the new entry at the top of `logs/harbor-bakery-ordering.md`:
 - Done: Cutoff time confirmed with Mara.
 ```
 
-The agent then rebuilds the index and runs lint. Nothing was deleted. The old entries are still below.
+The agent then adds the new note's line to the index. Nothing was deleted. The old entries are still below.
 
 ## 17:20, switching to client-b
 
 Next I open the Tidewater Library repo. The agent reads only that project's file. It sees no Harbor Bakery notes and does not copy anything across.
 
-This matters even when nobody means harm. If a sync from one client leaks a price, a name or a plan into another client's file, you cannot take it back. So a note in `client-a` never links to a note in `client-b`, and lint reports it as an error. Notes in `personal`, like my writing on open items, can be linked from both.
+This matters even when nobody means harm. If a sync from one client leaks a price, a name or a plan into another client's file, you cannot take it back. So a note in `client-a` never links to a note in `client-b`, and the agent's rules forbid it. Notes in `personal`, like my writing on open items, can be linked from both.
 
 Anything truly private goes in `.confidential/`. Agents leave it alone unless I point them at a note.
 

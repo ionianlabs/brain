@@ -48,9 +48,8 @@ Slugs use lowercase `a-z`, `0-9` and hyphens only.
 1. Update the project's state file so it describes the present. Keep it within budget and horizon (see Writing rules).
 2. Move done items and decisions to the top of the log, under today's date.
 3. Set `updated` to today in every file you changed.
-4. Rebuild the index: `brain index`.
-5. Run lint: `brain lint`. Fix every error.
-6. Tell the user what changed.
+4. Keep the index lines in step by hand (see Index): add a line for every note you created, and update the line of every note whose `description` changed.
+5. Tell the user what changed.
 
 ## Frontmatter
 
@@ -81,9 +80,9 @@ Copy a starting point from `templates/`.
 
 ## Writing rules
 
-- Project files stay short: what to act on now. Outside `## Open`, aim for 300 words. Lint warns above 400 words, or above 15 open items.
-- Background a project needs on demand (meeting prep, plan, stakeholder map, method) goes to a knowledge note with `project: <slug>`. `brain index` lists it in the project file's notes map. Write its `description` as the question it answers, because that line is what decides whether an agent opens it.
-- A note that matters only until a date (a meeting prep) gets `stale_after`. When lint flags it as stale, move what still matters to the log or the project, and archive or delete the note.
+- Project files stay short: what to act on now. Outside `## Open`, aim for 300 words. These are soft budgets: past 400 words, or past 15 open items, move detail to a note.
+- Background a project needs on demand (meeting prep, plan, stakeholder map, method) goes to a knowledge note with `project: <slug>`. It is listed in the project file's notes map. Write its `description` as the question it answers, because that line is what decides whether an agent opens it.
+- A note that matters only until a date (a meeting prep) gets `stale_after`. When the date has passed, move what still matters to the log or the project, and archive or delete the note.
 - Project files describe the present. They never hold history. `## Now` holds the current state and any decision still in force that a reader needs to know. Finished work and the full decision record go to the log.
 - A project file has this shape: `# Title`, then a `History:` line that links to the log (`/logs/<slug>.md`), then `## Now`, `## Open`, `## People`, `## Links` in that order.
 - History goes to the log. Add entries at the top, under today's date. If today's heading exists, add under it.
@@ -109,7 +108,7 @@ Open items sit under `## Open` in the project file:
 
 ### Notes map
 
-`brain index` writes a block between `<!-- brain:notes start -->` and `<!-- brain:notes end -->` into each project file that has notes, before `## Now`. Never edit it by hand.
+Each project file that has notes carries a block between `<!-- brain:notes start -->` and `<!-- brain:notes end -->`, before `## Now`: one line per note, `- [Title](/knowledge/slug.md): description`. When you create a note with `project: <slug>`, add its line there. Change a line when the note's `description` changes. Never rewrite the whole block.
 
 ## Starting a new project
 
@@ -118,7 +117,7 @@ Only triage's new-project verdict, or the owner deliberately following these ste
 1. Pick a slug: lowercase `a-z`, `0-9` and hyphens.
 2. Copy `templates/project.md` to `projects/<slug>.md` and `templates/log.md` to `logs/<slug>.md`.
 3. Fill in the frontmatter and the title in both. Use the same `org` in both, and set `project: <slug>` in the log.
-4. Run `brain index`, then lint.
+4. Add the project's line to the index, under its phase heading.
 
 ## Org boundary
 
@@ -128,11 +127,11 @@ Every note has an `org`. Orgs other than `personal` are isolated from each other
 - Never copy content between orgs.
 - Links between `personal` and any org are allowed.
 
-The reason: one brain may hold work for several employers or clients. Mixing them leaks information. Lint reports a cross-org link as an error.
+The reason: one brain may hold work for several employers or clients. Mixing them leaks information. Check this by hand: no tool does it for you.
 
 ## Confidential
 
-`.confidential/` is off limits. Do not read, search, list or edit it unless the user points you at a specific note there. Never link to it from other notes. It is gitignored by default and lint never reads it.
+`.confidential/` is off limits. Do not read, search, list or edit it unless the user points you at a specific note there. Never link to it from other notes. It is gitignored by default.
 
 ## Inbox
 
@@ -148,7 +147,7 @@ An Aware day file (`inbox/YYYY-MM-DD-aware.md`, `source: flow`) is the exception
 
 ## Agenda rules
 
-The `agenda` skill reads this block and obeys it. Rules may tighten the report. They never raise its caps of 5 items under "Needs you" and 20 lines in total.
+The `agenda` skill reads this block and obeys it. Rules may tighten the report. They never raise its caps of 5 items in each table.
 
 - Projects with `phase: done` never surface.
 - Anything already moved to a log never surfaces.
@@ -156,25 +155,23 @@ The `agenda` skill reads this block and obeys it. Rules may tighten the report. 
 
 ## Index
 
-`index.md` holds a generated block between `<!-- brain:index start -->` and `<!-- brain:index end -->`. Never edit it by hand. Run `brain index`. Text outside the markers is yours to edit.
+`index.md` holds a generated block between `<!-- brain:index start -->` and `<!-- brain:index end -->`. Agents keep its lines in step by hand, one line at a time, and never rewrite the whole block:
+
+- A new note gets one line in the format the block already uses: `- [Title](/folder/slug.md): description (org, updated YYYY-MM-DD)`. A project goes under its phase heading, a knowledge note without `project` under `## Knowledge`.
+- A note with `project: <slug>` goes in that project's notes map instead, and the `N notes` count in the project's index line goes up by one.
+- When you change a note's `description`, change its line.
+
+Text outside the markers is yours to edit.
 
 ## Tools
 
-`brain` is the Ionian Brain CLI. With the plugin, your session context names the exact command. Otherwise run `node bin/brain.mjs` in a clone of `https://github.com/ionianlabs/brain`. If it does not run, skip these steps and tell the user.
-
-| Command | Does |
-|---|---|
-| `brain index` | Rebuilds the index block |
-| `brain index --check` | Exits 1 if the index is out of date. Writes nothing |
-| `brain lint` | Checks frontmatter, links, org boundary, size and staleness. Writes nothing |
-
-Lint exits 1 on errors. Warnings are allowed, but read them.
+The `brain` CLI is optional tooling, for a terminal. It is not needed to use this brain, and agents never depend on it. If it is available, `brain index` rebuilds the index block and the notes maps, and `brain lint` checks frontmatter, links, the org boundary, size and staleness. Both are a way to tidy up or repair drift after agents kept the lines by hand. Get it from `https://github.com/ionianlabs/brain`.
 
 ## Never
 
-- Never edit the generated index block by hand.
+- Never rewrite the whole generated index block. Add or change single lines.
 - Never edit or delete log entries.
-- Never link across orgs, unless one side is `personal`.
+- Never link across orgs, unless one side is `personal`. No tool checks this for you.
 - Never open `.confidential/` without being pointed at a note.
 - Never put history in a project file.
 - Never write secrets, passwords or tokens into any note.

@@ -8,11 +8,7 @@ description: Capture a thought into the brain inbox from any chat. Use when the 
 
 Capture one thought into the brain's inbox. This is the one cheap, safe write path from any context: it writes a single new file and nothing else.
 
-Find the brain first. Use the brain folder named in your session context, if there is one. Otherwise use the `BRAIN_DIR` environment variable if it is set, otherwise `$IONIAN_HOME/brain` if `IONIAN_HOME` is set, otherwise `{{BRAIN_DIR}}`. Take the first candidate that is set and never fall through to the next one. Below, `<brain>` is that folder.
-
-Find the brain CLI the same way. Use the command named in your session context, if there is one. Otherwise use {{BRAIN_CLI}}. Below, `<cli>` is that command.
-
-If `<brain>/AGENTS.md` does not exist, say that no brain was found at that path and write nothing. You may offer to create one with `<cli> init "<brain>"`. Then stop.
+Find the brain first. Use the brain folder named in your session context, if there is one. Otherwise use the folder the user shared or named in this conversation that has an `AGENTS.md` at its root. Otherwise use the `BRAIN_DIR` environment variable if it is set, then `$IONIAN_HOME/brain` if `IONIAN_HOME` is set, then `{{BRAIN_DIR}}`. Below, `<brain>` is that folder. If no folder with an `AGENTS.md` is found, say so and point to https://github.com/ionianlabs/brain to set one up. Then stop.
 
 ## Steps
 
@@ -34,7 +30,7 @@ If `<brain>/AGENTS.md` does not exist, say that no brain was found at that path 
 ## Rules
 
 - Never write secrets: passwords, tokens and keys never go into a capture. Summarise around them.
-- Write exactly one file. No index, no lint, no other write. If the write fails, report the error and write nothing.
+- Write exactly one file. No index line, no other write. A capture is not listed in the index. If the write fails, report the error and write nothing.
 - Do not read project files, logs or notes. Do not place the thought anywhere else: `triage` does that.
 - Never open `.confidential/`.
 

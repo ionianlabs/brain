@@ -1,15 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import path from 'node:path';
 import { buildPlugin, pluginFiles } from '../scripts/build-plugin.mjs';
 import { cliCommand, FROM_CLONE } from '../src/init.mjs';
-import { brainDir, context, output, CLI } from '../plugin/hooks/session-start.mjs';
 import { HERE, tmpDir, writeTree } from './helpers.mjs';
 
 const ROOT = path.join(HERE, '..');
-const HOOK = path.join(ROOT, 'plugin', 'hooks', 'session-start.mjs');
 const readJson = (p) => JSON.parse(fs.readFileSync(p, 'utf8'));
 const body = (text) => text.replace(/^---\n[\s\S]*?\n---\n/, '');
 
@@ -17,24 +15,24 @@ test('plugin/ is in sync with template/skills and package.json', () => {
   assert.deepEqual(buildPlugin({ rootDir: ROOT, check: true }), [], 'run npm run build:plugin');
 });
 
-test('builds plugin skills with ~/Ionian/brain and without the type key', () => {
+test('builds plugin skills with ~/Ionian/brain and without the type key, and removes everything else', () => {
   const root = tmpDir();
   writeTree(root, {
     'package.json': '{"version":"9.9.9","license":"MIT"}',
-    'template/skills/demo/SKILL.md': '---\nname: demo\ntype: skill\ndescription: Demo.\n---\n\nRead {{BRAIN_DIR}}/index.md with {{BRAIN_CLI}}. type: stays in the body.\n',
+    'template/skills/demo/SKILL.md': '---\nname: demo\ntype: skill\ndescription: Demo.\n---\n\nRead {{BRAIN_DIR}}/index.md. type: stays in the body.\n',
     'bin/brain.mjs': '// cli\n',
     'plugin/skills/gone/SKILL.md': 'stale\n',
     'plugin/cli/src/old.mjs': 'stale\n',
+    'plugin/agents/reader.md': 'stale\n',
+    'plugin/hooks/hooks.json': 'stale\n',
   });
   assert.deepEqual(buildPlugin({ rootDir: root, check: true }).sort(), [
-    '.claude-plugin/plugin.json', 'cli/bin/brain.mjs', 'cli/package.json', 'cli/src/old.mjs', 'cli/template/skills/demo/SKILL.md', 'skills/demo/SKILL.md', 'skills/gone/SKILL.md',
+    '.claude-plugin/plugin.json', 'agents/reader.md', 'cli/src/old.mjs', 'hooks/hooks.json', 'skills/demo/SKILL.md', 'skills/gone/SKILL.md',
   ]);
   buildPlugin({ rootDir: root });
   const skill = fs.readFileSync(path.join(root, 'plugin/skills/demo/SKILL.md'), 'utf8');
-  assert.equal(skill, '---\nname: demo\ndescription: Demo.\n---\n\nRead ~/Ionian/brain/index.md with `node "<skill>/../../cli/bin/brain.mjs"`, where `<skill>` is the folder that holds this SKILL.md. type: stays in the body.\n');
-  assert.ok(!fs.existsSync(path.join(root, 'plugin/skills/gone/SKILL.md')));
-  assert.ok(!fs.existsSync(path.join(root, 'plugin/cli/src/old.mjs')));
-  assert.equal(readJson(path.join(root, 'plugin/cli/package.json')).dependencies, undefined);
+  assert.equal(skill, '---\nname: demo\ndescription: Demo.\n---\n\nRead ~/Ionian/brain/index.md. type: stays in the body.\n');
+  for (const d of ['cli', 'agents', 'hooks', 'skills/gone']) assert.ok(!fs.existsSync(path.join(root, 'plugin', d)), d);
   assert.equal(readJson(path.join(root, 'plugin/.claude-plugin/plugin.json')).version, '9.9.9');
   assert.deepEqual(buildPlugin({ rootDir: root, check: true }), []);
 });
@@ -47,11 +45,39 @@ test('Copilot prompt files say the same as the skills', () => {
   }
 });
 
-test('F6.2 plugin/skills holds agenda, drop, triage, sync and aware, and the build leaves plugin/agents alone', () => {
-  assert.deepEqual(fs.readdirSync(path.join(ROOT, 'plugin/skills')).sort(), ['agenda', 'aware', 'drop', 'sync', 'triage']);
-  const files = Object.keys(pluginFiles({ rootDir: ROOT }));
-  assert.ok(!files.some((f) => f.startsWith('agents/')));
-  assert.ok(files.some((f) => f.startsWith('skills/')) && files.some((f) => f.startsWith('cli/')));
+const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(path.join(d, e.name)) : [path.join(d, e.name)]));
+const SKILLS = ['agenda', 'aware', 'drop', 'sync', 'triage'];
+
+test('the plugin holds plugin.json and the five SKILL.md files, nothing else', () => {
+  const files = walk(path.join(ROOT, 'plugin')).map((f) => path.relative(path.join(ROOT, 'plugin'), f)).sort();
+  assert.deepEqual(files, ['.claude-plugin/plugin.json', ...SKILLS.map((n) => `skills/${n}/SKILL.md`)]);
+  assert.deepEqual(Object.keys(pluginFiles({ rootDir: ROOT })).sort(), files);
+});
+
+test('no skill, built or template, mentions the CLI placeholder, brain.mjs, scribe or reader', () => {
+  for (const rel of [...SKILLS.map((n) => `plugin/skills/${n}/SKILL.md`), ...SKILLS.map((n) => `template/skills/${n}/SKILL.md`), ...SKILLS.map((n) => `template/.github/prompts/${n}.prompt.md`)]) {
+    const text = fs.readFileSync(path.join(ROOT, rel), 'utf8');
+    assert.ok(!/<cli>|\{\{BRAIN_CLI\}\}|brain\.mjs|\bscribe\b|\breader\b/i.test(text), rel);
+  }
+});
+
+test('every skill finds the brain with the same paragraph and stops without an AGENTS.md', () => {
+  const para = (n) => fs.readFileSync(path.join(ROOT, 'plugin/skills', n, 'SKILL.md'), 'utf8').split('\n').find((l) => l.startsWith('Find the brain first.'));
+  assert.ok(para('agenda').includes('https://github.com/ionianlabs/brain'));
+  assert.ok(para('agenda').includes('the folder the user shared or named in this conversation'));
+  for (const n of SKILLS) assert.equal(para(n), para('agenda'), n);
+});
+
+test('skills that create notes keep the index by hand and never rewrite the block', () => {
+  for (const n of ['aware', 'sync', 'triage']) {
+    const text = fs.readFileSync(path.join(ROOT, 'plugin/skills', n, 'SKILL.md'), 'utf8');
+    assert.match(text, /## Index bookkeeping/, n);
+    assert.match(text, /Never rewrite the whole generated block/, n);
+    assert.match(text, /brain:notes start/, n);
+  }
+  for (const n of ['sync', 'triage']) {
+    assert.match(fs.readFileSync(path.join(ROOT, 'plugin/skills', n, 'SKILL.md'), 'utf8'), /If the `brain` CLI is available in a terminal, `brain index` and `brain lint` can tidy up afterwards; never required\./, n);
+  }
 });
 
 test('F1.4 the built drop skill has no placeholders and matches its prompt', () => {
@@ -59,15 +85,6 @@ test('F1.4 the built drop skill has no placeholders and matches its prompt', () 
   assert.ok(!skill.includes('{{'));
   const prompt = fs.readFileSync(path.join(ROOT, 'template/.github/prompts/drop.prompt.md'), 'utf8');
   assert.equal(body(prompt), body(fs.readFileSync(path.join(ROOT, 'template/skills/drop/SKILL.md'), 'utf8')));
-});
-
-test('F5.4 the reader and scribe agents declare exactly their tools', () => {
-  const tools = (name) => {
-    const fm = fs.readFileSync(path.join(ROOT, 'plugin/agents', `${name}.md`), 'utf8').match(/^---\n([\s\S]*?)\n---\n/)[1];
-    return fm.split('\n').filter((l) => l.startsWith('tools:'));
-  };
-  assert.deepEqual(tools('reader'), ['tools: Read, Grep, Glob']);
-  assert.deepEqual(tools('scribe'), ['tools: Read, Edit, Write, Bash']);
 });
 
 test('marketplace lists the plugin, with no manifest that would take precedence', () => {
@@ -91,82 +108,35 @@ test('marketplace lists the plugin, with no manifest that would take precedence'
   }
 });
 
-test('hooks.json runs the session-start script', () => {
-  const hooks = readJson(path.join(ROOT, 'plugin/hooks/hooks.json'));
-  const [group] = hooks.hooks.SessionStart;
-  const [hook] = group.hooks;
-  assert.equal(hook.type, 'command');
-  assert.equal(hook.command, 'node "${CLAUDE_PLUGIN_ROOT}/hooks/session-start.mjs"');
-  assert.ok(fs.existsSync(HOOK));
-});
-
-test('brainDir: BRAIN_DIR, then $IONIAN_HOME/brain, then ~/Ionian/brain', () => {
-  assert.equal(brainDir({}, '/h'), path.join('/h', 'Ionian', 'brain'));
-  assert.equal(brainDir({ BRAIN_DIR: '  ', IONIAN_HOME: ' ' }, '/h'), path.join('/h', 'Ionian', 'brain'));
-  assert.equal(brainDir({ IONIAN_HOME: '/i/home' }, '/h'), path.join(path.resolve('/i/home'), 'brain'));
-  assert.equal(brainDir({ IONIAN_HOME: '~/ih' }, '/h'), path.join('/h', 'ih', 'brain'));
-  assert.equal(brainDir({ BRAIN_DIR: '/x/y', IONIAN_HOME: '/i/home' }, '/h'), path.resolve('/x/y'));
-  assert.equal(brainDir({ BRAIN_DIR: '~' }, '/h'), '/h');
-  assert.equal(brainDir({ BRAIN_DIR: '~/notes' }, '/h'), path.join('/h', 'notes'));
-  assert.equal(brainDir({ BRAIN_DIR: '/x/y' }, '/h'), path.resolve('/x/y'));
-});
-
-test('brainDir never falls back to ~/brain, even if it exists', () => {
-  const home = tmpDir();
-  fs.mkdirSync(path.join(home, 'brain'), { recursive: true });
-  fs.writeFileSync(path.join(home, 'brain', 'AGENTS.md'), 'x\n');
-  assert.equal(brainDir({}, home), path.join(home, 'Ionian', 'brain'));
-  assert.equal(brainDir({ IONIAN_HOME: path.join(home, 'ih') }, home), path.join(home, 'ih', 'brain'));
-});
-
-test('hook context names the path only, and both output shapes carry it', () => {
-  const root = tmpDir();
-  writeTree(root, { 'b/AGENTS.md': '---\ntype: guide\n---\n\nSECRET-RULE\n', 'b/projects/p.md': 'SECRET-NOTE\n' });
-  const found = context(path.join(root, 'b'));
-  assert.ok(found.includes(`${path.join(root, 'b')}/AGENTS.md`));
-  assert.ok(found.includes(CLI) && CLI.endsWith(`${path.join('plugin', 'cli', 'bin', 'brain.mjs')}"`));
-  assert.ok(!/SECRET/.test(found));
-  assert.match(context(path.join(root, 'missing')), /no brain folder was found/);
-  const out = JSON.parse(output('hello'));
-  assert.equal(out.additionalContext, 'hello');
-  assert.deepEqual(out.hookSpecificOutput, { hookEventName: 'SessionStart', additionalContext: 'hello' });
-});
-
-test('hook script prints one JSON line and exits 0', () => {
-  const home = tmpDir();
-  const r = spawnSync(process.execPath, [HOOK], { encoding: 'utf8', env: { ...process.env, HOME: home, USERPROFILE: home, BRAIN_DIR: '', IONIAN_HOME: '' } });
-  assert.equal(r.status, 0);
-  assert.equal(r.stderr, '');
-  assert.match(JSON.parse(r.stdout).additionalContext, /no brain folder was found/);
-});
-
-test('the bundled CLI runs and creates a brain on its own', () => {
-  const cli = path.join(ROOT, 'plugin', 'cli', 'bin', 'brain.mjs');
-  const v = spawnSync(process.execPath, [cli, '--version'], { encoding: 'utf8' });
-  assert.equal(v.stdout.trim(), readJson(path.join(ROOT, 'package.json')).version);
-  const dir = path.join(tmpDir(), 'b');
-  const r = spawnSync(process.execPath, [cli, 'init', dir, '--example'], { encoding: 'utf8', env: { ...process.env, BRAIN_HOME: tmpDir() } });
-  assert.equal(r.status, 0, r.stderr);
-  const skill = fs.readFileSync(path.join(dir, 'skills/agenda/SKILL.md'), 'utf8');
-  // The plugin copy moves on every update, so the new brain points at a clone.
-  assert.ok(skill.includes(FROM_CLONE));
-  assert.ok(!skill.includes(cli));
-  assert.ok(!skill.includes('{{'));
-  assert.equal(spawnSync(process.execPath, [cli, 'lint', dir], { encoding: 'utf8' }).status, 0);
-});
-
-test('nothing tells the user or an agent to use npx or npm', () => {
-  const r = spawnSync('git', ['grep', '-n', '-i', '-I', '-E', '\\bnpx\\b', '--', '.'], { cwd: ROOT, encoding: 'utf8' });
-  const hits = r.stdout.split('\n').filter((l) => l && !l.startsWith('test/plugin.test.mjs'));
-  assert.deepEqual(hits, []);
-  for (const rel of ['plugin/skills/agenda/SKILL.md', 'plugin/skills/sync/SKILL.md', 'plugin/skills/drop/SKILL.md', 'plugin/skills/triage/SKILL.md', 'plugin/agents/reader.md', 'plugin/agents/scribe.md', 'plugin/hooks/session-start.mjs', 'docs/plugin.md']) {
-    assert.ok(!/\bnpx\b/i.test(fs.readFileSync(path.join(ROOT, rel), 'utf8')), rel);
-  }
-});
-
-test('cliCommand points at this copy, or at a clone when run from the plugin', () => {
+test('cliCommand points at this copy, or at a clone when run from a copy that sits in a plugin', () => {
   const root = tmpDir();
   writeTree(root, { 'plugin/.claude-plugin/plugin.json': '{}', 'plugin/cli/bin/brain.mjs': '' });
   assert.equal(cliCommand(path.join(root, 'plugin', 'cli')), FROM_CLONE);
   assert.equal(cliCommand(path.join(root, 'clone')), `\`node "${path.join(root, 'clone', 'bin', 'brain.mjs')}"\``);
+});
+
+test('no em or en dashes under template/ and plugin/', () => {
+  const files = [...walk(path.join(ROOT, 'template')), ...walk(path.join(ROOT, 'plugin'))];
+  assert.ok(files.length > 0);
+  const bad = files.filter((f) => /[\u2013\u2014]/.test(fs.readFileSync(f, 'utf8')));
+  assert.deepEqual(bad, []);
+});
+
+test('the agenda skill is built as tables, with the p0 overflow line and no CLI or lint', () => {
+  for (const rel of ['plugin/skills/agenda/SKILL.md', 'template/skills/agenda/SKILL.md', 'template/.github/prompts/agenda.prompt.md']) {
+    const text = fs.readFileSync(path.join(ROOT, rel), 'utf8');
+    assert.ok(text.includes('| Prio | What | Project | Due | Talk to |'), rel);
+    assert.ok(text.includes('| What | Project | Waiting for | Talk to |'), rel);
+    assert.match(text, /\*\*12 items are p0\.\*\* p0 means today or blocking others, so most need re-ranking\./, rel);
+    assert.match(text, /\*12 more need you\. Say "agenda everything" to see them\.\*/, rel);
+    assert.match(text, /\*\*Next:\*\*/, rel);
+    assert.match(text, /LAST parenthesis group/, rel);
+    assert.ok(!/hygiene|lint/i.test(text), rel);
+  }
+});
+
+test('nothing tells the user or an agent to use npx', () => {
+  const r = spawnSync('git', ['grep', '-n', '-i', '-I', '-E', '\\bnpx\\b', '--', '.'], { cwd: ROOT, encoding: 'utf8' });
+  const hits = r.stdout.split('\n').filter((l) => l && !l.startsWith('test/plugin.test.mjs'));
+  assert.deepEqual(hits, []);
 });

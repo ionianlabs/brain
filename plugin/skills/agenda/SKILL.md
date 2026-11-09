@@ -1,87 +1,101 @@
 ---
 name: agenda
-description: Budgeted, read-only view of what needs the owner now. Use when the user says "agenda", "brief", "morning brief" or "what's on today". Shows at most 5 items under "Needs you" and at most 20 lines in total, ranked across projects, with everything else folded into counts. Say "agenda everything" for the full report. Never edits anything.
+description: Read-only view of what needs the owner now. Use when the user says "agenda", "brief", "morning brief" or "what's on today". Prints a short markdown report built as tables, a summary line first and then at most 5 items each under "Needs you", "Coming up" and "Blocked", with everything else folded into counts. Say "agenda everything" for the full report. Never edits anything.
 ---
 
 # Agenda
 
 Show what needs the owner now, inside a hard attention budget, and fold the rest into counts. This skill is read-only: never edit, create, move or delete anything.
 
-Find the brain first. Use the brain folder named in your session context, if there is one. Otherwise use the `BRAIN_DIR` environment variable if it is set, otherwise `$IONIAN_HOME/brain` if `IONIAN_HOME` is set, otherwise `~/Ionian/brain`. Below, `<brain>` is that folder.
-
-Find the brain CLI the same way. Use the command named in your session context, if there is one. Otherwise use `node "<skill>/../../cli/bin/brain.mjs"`, where `<skill>` is the folder that holds this SKILL.md. Below, `<cli>` is that command.
-
-If `<brain>/AGENTS.md` does not exist, say that no brain was found there and offer to create one with `<cli> init "<brain>"`. Then stop.
+Find the brain first. Use the brain folder named in your session context, if there is one. Otherwise use the folder the user shared or named in this conversation that has an `AGENTS.md` at its root. Otherwise use the `BRAIN_DIR` environment variable if it is set, then `$IONIAN_HOME/brain` if `IONIAN_HOME` is set, then `~/Ionian/brain`. Below, `<brain>` is that folder. If no folder with an `AGENTS.md` is found, say so and point to https://github.com/ionianlabs/brain to set one up. Then stop.
 
 ## Steps
 
-1. Read `<brain>/AGENTS.md`. If it has an `## Agenda rules` block, read and obey it. Rules may tighten the report. They never raise the 5-item or 20-line caps.
+1. Read `<brain>/AGENTS.md`. If it has an `## Agenda rules` block, read and obey it. A brain's rules may tighten the report, for example on wording or who to name. They never raise the caps of 5 items per table.
 2. Take today's date from the system. Compare dates by whole days.
-3. Run `<cli> open "<brain>" --json`. This is your only source for open items. Add `--project <slug>` or `--org <slug>` when the user gave a scope. Never read project files in bulk.
-4. List `<brain>/inbox/`. Count the captures. Note the Aware day files (`source: flow`) and how many lines in them are still marked `- [ ]`. If you cannot list the folder, say so in the report. Do not write "none".
-5. Run `<cli> lint "<brain>"` and read the output.
-6. If `<cli> open` or `<cli> lint` cannot run, say which data is missing and report the rest. Never write "none" for data you could not get.
-7. Never open `.confidential/`, even if a note mentions it.
-8. Where the host supports subagents and the user asks a follow-up about a specific file, ask the `reader` agent one question with the brain path. Without subagents, read only the lines you need. The agenda itself never needs it.
+3. Read each `<brain>/projects/*.md` whose frontmatter `phase` is not `done`. From each file read only the frontmatter (`org`, `phase`) and the `## Open` section, nothing else. If the user gave a scope, read only the files in scope.
+4. An open item is a line that starts with `- [ ] `. Its keys come from the LAST parenthesis group on the line: `prio`, `owner`, `due`, `blocked`. A `prio:` that appears elsewhere on the line is ignored, and the item counts as unranked.
+5. List `<brain>/inbox/`. Count the captures, and the Aware day files (`*-aware.md`, `source: flow`) with the number of their lines still marked `- [ ] `. If you cannot list the folder, say so in the report. Do not write "none".
+6. Never open `.confidential/`, even if a note mentions it. Never write "none" for data you could not get.
+
+## Ranking
+
+"Needs you" takes, in this order:
+
+1. overdue items, oldest due first;
+2. items due today;
+3. p0 items without a date or with a later date.
+
+Ties break by prio (p0, p1, p2, unranked), then by project file order, then by line order.
+
+"Coming up" takes items due in the next 3 days, p0 and p1 only, that are not already shown. Scope `week` widens this to 7 days.
+
+"Blocked" takes items with `blocked`.
+
+An item appears once only, in the first section that admits it. Show at most 5 items in each section.
 
 ## Report
 
-The report has an attention budget: at most 5 items under "Needs you" and at most 20 lines in total. A line is any non-blank output line, headings and fold lines included. Everything else appears only as counts. Print these sections, in this order:
+Markdown, built so the summary line is read first, then the Needs you table. Use exactly this shape and leave out any section that would be empty:
 
-1. **Header**: the date, then `N need you, M held back`. "Held back" counts every open item in scope that got no line of its own anywhere in the report.
-2. **Needs you**: every p0 item regardless of due date, plus overdue and due-today items of any priority, ranked as `<cli> open` ranks them, at most 5. Fold the rest of the eligible items into one line, `and K more need you — say more`. Saying "more" expands the whole section.
-3. **Coming up**: items due in the next 3 days (scope "week" widens this to 7 days), p0 and p1 only, same ranking. An item appears in one section only, the earliest that admits it.
-4. **Blocked**: items with `blocked`, with the reason and the `owner` as who to talk to.
-5. **Inbox**: the count only. Call out Aware day files, and say "say triage".
-6. **Hygiene**: one line, only when lint reports errors or over-budget or stale warnings.
-7. **Honesty line**: exactly one line with the totals of held-back items and of unranked or undated items. Give the per-project breakdown only when asked.
+```
+## Agenda, Mon 9 Nov
 
-Only sections 2 to 4 print item lines. Each item line names its project, for example `[client-a-site]`. Do not group the default report by org and do not cluster it by project: five ranked lines need no grouping. When the 20-line total would be exceeded, "Coming up" collapses to a count first, then "Blocked". "Needs you" never collapses below its 5.
+**4 need you** · 2 coming up · 1 blocked · inbox: 3 captures, 1 Aware file
+
+### Needs you
+| Prio | What | Project | Due | Talk to |
+|---|---|---|---|---|
+| **p0** | Talk to Alex on role and scope | atlas | **today** | Alex |
+| **p0** | Define the setup | client-a-site | **overdue** since 6 Nov | Sam |
+
+### Coming up
+| Prio | What | Project | Due | Talk to |
+|---|---|---|---|---|
+| p1 | Review the pilot scope | atlas | Wed 11 Nov | Sam |
+
+### Blocked
+| What | Project | Waiting for | Talk to |
+|---|---|---|---|
+| Publish the pricing page | client-a-site | legal review | Alex |
+
+**Next:** talk to Alex today, before the setup is defined.
+
+*Not shown: 110 open items (25 p1, 50 p2, 35 unranked). Say "agenda everything" for all, or "agenda atlas" for one project.*
+```
+
+Rules for the report:
+
+- The summary line counts what qualifies, not what is shown. Use `·` in the summary line only.
+- "What" is the item text shortened to about 60 characters, with markdown links and emphasis removed.
+- "Talk to" is the item's `owner`, else a person named in the item text, else empty. Never write "nobody".
+- Due fields are one of `**overdue** since 6 Nov`, `**today**`, `Tue 10 Nov`, or empty.
+- When more than 5 items qualify for Needs you, the table shows 5. Add one line under it: `*12 more need you. Say "agenda everything" to see them.*`
+- When more than 5 items are p0, use this line instead: `**12 items are p0.** p0 means today or blocking others, so most need re-ranking.` Use the real count.
+- The Next line names the single most pressing action and who to talk to. When the inbox has captures and nothing in Needs you is due today or overdue, it says "say triage".
+- The last line folds everything not shown into counts by prio. The per-project breakdown comes only when asked.
+- Use no dashes anywhere in the report.
 
 ## Scope
 
-- A project slug (`agenda atlas`): only that project's items and hygiene findings.
-- An org slug: only that org's items and findings. Never mix one org's details into another's.
+- A project slug (`agenda atlas`): only that project's items.
+- An org slug: only that org's items. Never mix one org's details into another's.
 - `week`: the "Coming up" horizon becomes 7 days.
 
 ## Exhaustive mode
 
-When the user says "agenda everything", print the full report instead. Group by org, one heading per org (`personal` last), and cluster by project inside each org. Per org, in this order:
+When the user says "agenda everything", print the full report instead:
 
-- **Overdue**: open items with `due` before today.
-- **Due in 7 days**: open items due from today to today plus 7 days.
-- **Blocked**: open items with `blocked`, with the reason.
-- **Who to talk to**: the owners of overdue, due-soon and blocked items, plus People whose entry says when to talk to them.
-- **Changed in the last 7 days**: notes with `updated` in the last 7 days.
-- **Inbox**: the count of captures and their file names. A capture with `org: unknown` goes in a separate "Unsorted" group at the end.
-- **Hygiene**: the counts of errors and warnings and the most important findings, under the org of the note they name.
-
-Its data stays command and lookup based. Items and owners come from `<cli> open "<brain>" --json`. Recent changes come from the `updated` dates in `<brain>/index.md`. People entries come from single questions to the `reader` agent, or from reading only the `## People` lines of one project without it. Never read files in bulk. End each org with one line, `No due date: N open items`.
+- One `## <org>` heading per org, `personal` last.
+- Inside each org, one `### <project>` heading per project that has any open item.
+- Under each project heading, one table with the headers `Prio | What | Due | Talk to | Blocked`. Order the items overdue first, then by due date, then by prio.
+- At the end, an `### Inbox` list of the capture file names, and an "Unsorted" group for notes with `org: unknown`.
+- Never mix one org's items into another org's table.
 
 ## Rules
 
 - Read-only. Report only; do not triage or fix anything.
-- Every item names its project.
-- Stay inside one org per section. Orgs other than `personal` are isolated from each other.
-- Keep each line short. Do not repeat the full item text if a few words are clear.
-- End with one line that suggests the single most useful next step, inside the 20 lines in default mode.
-
-## Example output
-
-Today is 2026-11-08. Default report:
-
-```
-Agenda 2026-11-08: 3 need you, 18 held back
-Needs you
-- p0  [rover] Ship the beta (due 2026-11-05, owner: Ada)
-- p1  [atlas] Confirm the pilot plan (due 2026-11-07, owner: Sam)
-- p0  [rover] Pick the launch city
-Coming up
-- p1  [atlas] Review the budget (due 2026-11-10)
-Blocked
-- [rover] Publish the pricing page: waiting for legal review (talk to Ada)
-Inbox: 4 captures, 1 Aware day file, say triage
-Hygiene: 0 errors, 1 warning (atlas is over its word budget)
-Held back: 18 items with no line here, 6 of them undated or unranked
-Next step: ask Ada about the pricing page.
-```
+- Every row names its project.
+- Orgs other than `personal` are isolated from each other.
+- Never open `.confidential/`.
+- Never print em dashes or en dashes. Use commas, colons or full stops.

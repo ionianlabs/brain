@@ -6,7 +6,7 @@
     {
       "name": "brain",
       "source": "./plugin",
-      "description": "One memory for all agents, in plain markdown. Agenda, drop, triage, sync and aware skills, reader and scribe agents, plus a session-start pointer to your brain folder.",
+      "description": "One memory for all agents, in plain markdown. Five skills (agenda, drop, triage, sync and aware) that read and write your brain folder directly. No CLI, agents or hooks.",
       "category": "productivity",
       "tags": ["memory", "markdown", "notes"]
     }

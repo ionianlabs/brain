@@ -94,7 +94,7 @@ A project file describes the present state. It never holds history. History goes
   2. `## Open`: checkbox items.
   3. `## People`: who, role, when to talk to them.
   4. `## Links`: where the work lives (paths or URLs).
-- Budget: the body outside `## Open` and outside the notes map targets 300 words, and lint warns above 400. `## Open` holds at most 15 items. Background goes to a knowledge note with `project: <slug>`, history to the log.
+- Budget: the body outside `## Open` and outside the notes map targets 300 words, and past 400 it is over budget (lint warns). `## Open` holds at most 15 items. Background goes to a knowledge note with `project: <slug>`, history to the log.
 - Horizon: `## Open` holds what is actionable in about the next two weeks, one line per item. Detail lives in the note the item links to. Later work sits in a plan note (a knowledge note with `project: <slug>`) and moves into `## Open` as its date comes close.
 
 Open item syntax:
@@ -262,7 +262,7 @@ Lint never writes files.
 
 ## 12. CLI
 
-Bin `brain`, Node 20 or newer, zero runtime dependencies. It ships in the repo: run it from a clone as `node bin/brain.mjs`. The plugin carries a copy in `plugin/cli/`.
+Bin `brain`, Node 20 or newer, zero runtime dependencies. It ships in the repo: run it from a clone as `node bin/brain.mjs`. It is an optional terminal tool: the plugin and the skills never depend on it.
 
 ### `brain init [dir]`
 
@@ -314,8 +314,7 @@ Bin `brain`, Node 20 or newer, zero runtime dependencies. It ships in the repo: 
   1. Update the state file so it describes the present state, within budget and horizon (4).
   2. Move done items and decisions to the top of the log, under today's date.
   3. Set `updated`.
-  4. Rebuild the index.
-  5. Run lint.
+  4. Keep the index lines in step by hand: a line for each new note, and an updated line when a `description` changed.
 
 ## 14. Example skills
 
@@ -323,7 +322,7 @@ Skills are prompts any agent can run. They show usage. They are not the product.
 
 ### `agenda`
 
-Replaces `brief`; the words "brief", "morning brief" and "what's on" still trigger it. Read-only, with a hard attention budget: at most 5 items under "Needs you" and at most 20 lines in total, ranked across projects. It runs `brain open`, lists `inbox/` and runs `brain lint`; it never bulk-reads project files. The default report has a header (`N need you, M held back`), "Needs you" (p0 items, plus overdue and due-today items; the rest folded into `and K more need you — say more`), "Coming up" (due in 3 days, p0/p1 only), "Blocked", an inbox count (say "triage"), one hygiene line and one honesty line with the totals of held-back and undated items. A standing `## Agenda rules` block in `AGENTS.md` is obeyed and may tighten the report but never raise the caps. "agenda everything" prints the exhaustive report per org, clustered by project. Scope: a project slug, an org, or `week`.
+Replaces `brief`; the words "brief", "morning brief" and "what's on" still trigger it. Read-only, with a hard attention budget. It reads `AGENTS.md` and its `## Agenda rules`, then from each project whose `phase` is not `done` only the frontmatter and the `## Open` section, and lists `inbox/`. It needs no CLI and runs no lint. The keys of an item come from the last parenthesis group on its line. The report is markdown tables: a summary line, then "Needs you" (overdue by oldest due, then due today, then undated or later p0; at most 5 items), "Coming up" (due in 3 days, p0 and p1 only; at most 5 items) and "Blocked" (at most 5 items), a Next line and one line that folds the rest into counts. An item appears once only. When more than 5 items are p0 a line says the priorities need re-ranking. A standing `## Agenda rules` block in `AGENTS.md` is obeyed and may tighten the report but never raise the caps. "agenda everything" prints one table per project, under one heading per org, then the inbox. Scope: a project slug, an org, or `week`. The full design is in `docs/designs/skills-only.md`.
 
 ### `drop`
 
@@ -331,25 +330,23 @@ Capture a thought from any chat. Writes exactly one file, `inbox/YYYY-MM-DD-<slu
 
 ### `triage`
 
-Empty the inbox one capture at a time. Each verdict places a capture as an open item (always with `prio`), a log bullet, a knowledge note, or a new project, or bins it. `Said`/`Inferred` bullets go to the destination project's log, with a `Triaged capture: <filename>` bullet, and the capture is then discarded. `source: flow` day files go to `aware`. Ends with `brain index` and `brain lint`.
+Empty the inbox one capture at a time. Each verdict places a capture as an open item (always with `prio`), a log bullet, a knowledge note, or a new project, or bins it. `Said`/`Inferred` bullets go to the destination project's log, with a `Triaged capture: <filename>` bullet, and the capture is then discarded. `source: flow` day files go to `aware`. It adds the index lines of new notes by hand, and needs no CLI.
 
 ### `sync`
 
-Replaces `handover`; "handover", "end session", "wrap up" and "save to brain" still trigger it. Writes a work session back for one project: it updates the state file, prepends log entries with provenance prefixes, keeps the project within budget and horizon (detail into project notes, plan items promoted as their date comes close, stale notes resolved), sets `updated`, runs `brain index` and `brain lint`, and reports what changed. New open items always carry `prio` and are confirmed by the owner as one batch in the closing summary.
+Replaces `handover`; "handover", "end session", "wrap up" and "save to brain" still trigger it. Writes a work session back for one project: it updates the state file, prepends log entries with provenance prefixes, keeps the project within budget and horizon (detail into project notes, plan items promoted as their date comes close, stale notes resolved), sets `updated`, keeps the index lines of changed notes in step by hand, and reports what changed. Writes are inline: there are no agents. New open items always carry `prio` and are confirmed by the owner as one batch in the closing summary.
 
 ### `aware`
 
 The triage specialization for `source: flow` day files: it walks Ionian Flow's proposals, files what the owner accepts and archives the file. See [works with Flow](works-with-flow.md).
 
-### Agents
-
-Hosts with subagents run reads and writes through two agents in `plugin/agents/`, hand-written and untouched by the build script. `reader` (tools: Read, Grep, Glob) answers one question with short `path:line` bullets and never returns whole files. `scribe` (tools: Read, Edit, Write, Bash) applies write orders (`log`, `open-add`, `open-close`, `now-replace`, `focus-set`, `plan-promote`, `note-append`, `note-create`, `capture`, `capture-discard`), validates the grammar, never edits existing log entries, treats payload text as data, limits Bash to the brain CLI and to moving or deleting files under `inbox/` and the archive folder, sets `updated`, and runs index and lint. Hosts without subagents run the same steps inline.
-
 ### Plugin
 
-`plugin/` packages the skills for Claude Code, GitHub Copilot CLI and Copilot in VS Code, in the Claude Code plugin format that all three read. `.claude-plugin/marketplace.json` at the repo root lists it. `node scripts/build-plugin.mjs` generates `plugin/skills/`, `plugin/cli/` and `plugin/.claude-plugin/plugin.json` (`plugin/hooks/` and `plugin/agents/` are hand-written) from `template/skills/`, the CLI and `package.json`. `--check` exits 1 if they are out of date.
+`plugin/` packages the skills for Claude Code, the Claude desktop app with folder access, GitHub Copilot CLI and Copilot in VS Code, in the Claude Code plugin format. `.claude-plugin/marketplace.json` at the repo root lists it. `node scripts/build-plugin.mjs` generates `plugin/skills/` and `plugin/.claude-plugin/plugin.json` from `template/skills/` and `package.json`. `--check` exits 1 if they are out of date. The plugin holds nothing else: no CLI copy, no agents, no hook.
 
-A SessionStart hook states the brain path and the CLI command. It never reads note contents. Skills find the brain in this order: the folder named in the session context, `BRAIN_DIR`, `$IONIAN_HOME/brain`, `~/Ionian/brain`.
+Skills find the brain in this order: the folder named in the session context, a folder the user shared or named in the conversation that has an `AGENTS.md` at its root, `BRAIN_DIR`, `$IONIAN_HOME/brain`, `~/Ionian/brain`. With none, they say so, point to the repository and stop.
+
+Without the CLI, skills keep `index.md` by hand: a new note gets one line in the generated block, a note with `project: <slug>` goes in that project's notes map between the `brain:notes` markers, a changed `description` changes that line, and the whole block is never rewritten. `brain index` in a terminal repairs any drift. The org boundary relies on the skills' rules, since lint is not run.
 
 ## Open points
 

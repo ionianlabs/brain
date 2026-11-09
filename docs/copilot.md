@@ -20,7 +20,7 @@ mkdir -p ~/.copilot/skills
 cp -R ~/Ionian/brain/skills/agenda ~/Ionian/brain/skills/drop ~/Ionian/brain/skills/triage ~/Ionian/brain/skills/sync ~/.copilot/skills/
 ```
 
-Then run `/agenda` or `/sync`. Copilot has no subagents here, so the skills run their steps inline. The paths inside the skills were filled in with the absolute path of your brain when you ran `init`, so the copies work from any folder. If you also install the plugin, remove these copies.
+Then run `/agenda` or `/sync`. The skills run their steps inline. The paths inside the skills were filled in with the absolute path of your brain when you ran `init`, so the copies work from any folder. If you also install the plugin, remove these copies.
 
 ## Prompt files.
 

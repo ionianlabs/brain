@@ -1,8 +1,8 @@
 {
   "name": "@ionianlabs/brain",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "private": true,
-  "description": "An open-source markdown memory for coding agents: a folder format, a session protocol, and a small CLI to init, index and lint it.",
+  "description": "An open-source markdown memory for coding agents: a folder format, a session protocol, five skills, and an optional CLI to init, index and lint it.",
   "type": "module",
   "bin": {
     "brain": "bin/brain.mjs"

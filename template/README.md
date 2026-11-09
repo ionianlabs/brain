@@ -27,14 +27,9 @@ This folder is your memory in plain markdown. Every agent you use reads and writ
 
 Copy a file from `templates/` to start a note.
 
-## Check your work
+## Optional: tidy up from a terminal
 
-```
-brain index
-brain lint
-```
-
-`brain` is the Ionian Brain CLI. Run it as `node bin/brain.mjs` in a clone of `https://github.com/ionianlabs/brain`.
+Agents keep `index.md` up to date by hand. If you have the `brain` CLI (see `https://github.com/ionianlabs/brain`), `brain index` rebuilds the index and `brain lint` checks the folder. Neither is required.
 
 ## Format
 
