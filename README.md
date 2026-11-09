@@ -21,6 +21,8 @@ Add the plugin to your agent. It holds five skills and nothing else: `agenda`, `
 | Copilot CLI | `copilot plugin marketplace add ionianlabs/brain`, then `copilot plugin install brain@ionianlabs` | `/agenda` |
 | Copilot in VS Code | Add `ionianlabs/brain` to `chat.plugins.marketplaces`, then install `brain` from **Chat: Plugins** | `/brain:agenda` |
 
+The same marketplace lists Ionian Harness, a separate plugin for spec-first, test-first work in a code repo: `/plugin install ionian-harness@ionianlabs`. Brain does not need it, and it does not need Brain.
+
 You need a brain folder first, one with an `AGENTS.md` at its root. Create it with the optional CLI below, or copy `template/` from this repo. In the Claude desktop app, connect the folder. In Claude Code, the skills look in `~/Ionian/brain`, or in `BRAIN_DIR`. Then say "agenda".
 
 To create a brain, or without the plugin, clone the repo and run the optional CLI from it:

@@ -9,6 +9,13 @@
       "description": "One memory for all agents, in plain markdown. Five skills (agenda, drop, triage, sync and aware) that read and write your brain folder directly. No CLI, agents or hooks.",
       "category": "productivity",
       "tags": ["memory", "markdown", "notes"]
+    },
+    {
+      "name": "ionian-harness",
+      "source": { "source": "github", "repo": "ionianlabs/harness" },
+      "description": "Spec-first, test-first development with review gates and a read gate for Claude Code, enforced by hooks.",
+      "category": "development",
+      "tags": ["tdd", "review", "hooks", "specs"]
     }
   ]
 }
