@@ -2,7 +2,7 @@
 type: guide
 description: The rulebook every agent reads first. Layout, session protocol, writing rules and boundaries for this brain
 tags: [rules, protocol, agents]
-updated: 2026-11-02
+updated: 2026-11-11
 ---
 
 # AGENTS.md
@@ -21,8 +21,10 @@ If any other file disagrees with this one, this file wins.
 | `logs/<slug>.md` | Project history, newest first |
 | `inbox/YYYY-MM-DD-<slug>.md` | Quick captures, triaged later |
 | `knowledge/<slug>.md` | Reference material. With `project: <slug>` it belongs to one project |
+| `people/<slug>.md` | One note per person per org. The frontmatter and title line are shareable; the body below is private context that never leaves the brain |
+| `outbox/<audience>/` | The only path out of the brain. Everything in it is safe to share with that audience. Not a note folder, not indexed |
 | `templates/` | Starting points for new notes |
-| `skills/`, `.github/prompts/` | Example skills: `agenda`, `drop`, `triage`, `sync` and `aware` |
+| `skills/`, `.github/prompts/` | Example skills: `agenda`, `drop`, `triage`, `sync`, `aware` and `outbox` |
 | `.confidential/` | Off limits. See Confidential |
 
 Slugs use lowercase `a-z`, `0-9` and hyphens only.
@@ -55,9 +57,9 @@ Slugs use lowercase `a-z`, `0-9` and hyphens only.
 
 Frontmatter is YAML between two `---` lines at the very top of the file. Every `.md` file has a non-empty `type`. Only `index.md` is exempt.
 
-Files outside the note folders use `type: guide`, `type: skill` or `type: prompt`.
+Files outside the note folders use `type: guide`, `type: skill` or `type: prompt`. Files under `outbox/` use `type: audience` or `type: outbox`.
 
-Notes live in `projects/`, `logs/`, `inbox/` and `knowledge/`. Each note carries:
+Notes live in `projects/`, `logs/`, `inbox/`, `knowledge/` and `people/`. Each note carries:
 
 | Key | Value |
 |---|---|
@@ -73,8 +75,16 @@ Notes live in `projects/`, `logs/`, `inbox/` and `knowledge/`. Each note carries
 | `log` | `logs/` | `project`: the slug of its project |
 | `capture` | `inbox/` | Optional `source`: where it came from, for example `chat` or `agent` for a `drop`, or `flow` for Ionian Flow's Aware. `org: unknown` is allowed until triage |
 | `note` | `knowledge/` | none. Optional `project`: the slug of the one project it belongs to |
+| `person` | `people/` | `role`: one line, required. Optional `aliases`: list of other names |
 
 Optional keys keep their meaning: `status` is `draft`, `stable` or `deprecated`. `generated`, `verified` and `stale_after` are allowed and preserved. Use only simple YAML: scalars, inline or block lists, one level of nesting.
+
+Files under `outbox/<audience>/`:
+
+| `type` | File | Keys |
+|---|---|---|
+| `audience` | `audience.md` | Shared keys: `audience`, `space`, `rank`, `approver`, `roles`, `description`. `brain:` with `org`, `members`, `receives` and optional `context_sections`. Any other key belongs to another tool and is preserved untouched |
+| `outbox` | packages and `manifest.md` | Packages: `audience`, `approved`, `source_refs` |
 
 Copy a starting point from `templates/`.
 
@@ -88,6 +98,7 @@ Copy a starting point from `templates/`.
 - History goes to the log. Add entries at the top, under today's date. If today's heading exists, add under it.
 - Never edit or delete existing log entries.
 - A log starts with `# <Title> log`, then `## YYYY-MM-DD` headings, newest first. Prefix bullets with `Decision:` or `Done:`. Say whose fact it is: a bare prefix is the owner's, `Said(Sam): the freeze moves to March` is someone else's statement, `Inferred:` is an agent's own conclusion.
+- A project's `## People` entries link to the person note (`/people/<slug>.md`). Do not repeat the role there.
 - One fact lives in one place. Link to it. Do not copy it.
 - Use root-relative links, for example `/projects/example.md`. Anchors are fine.
 - Do not create files named `log.md`. Logs live in `logs/<slug>.md`.
@@ -153,11 +164,24 @@ The `agenda` skill reads this block and obeys it. Rules may tighten the report. 
 - Anything already moved to a log never surfaces.
 - Name who to talk to for each blocked item.
 
+## Outbox
+
+Content leaves the brain only through `outbox/`. The `outbox` skill writes there, after the owner approves each item. An agent asked to share brain content anywhere else points to the `outbox` skill instead.
+
+The barrier in brief: only allowlisted classes of content pass, nothing is copied (everything is rewritten), and the owner approves each item. The full rules live in the skill.
+
+## Outbox rules
+
+The `outbox` skill reads this block and obeys it. Rules may tighten the barrier. They never loosen it. Blocked terms live only here, never under `outbox/`.
+
+- Blocked terms (matched case-insensitively as whole phrases): none yet.
+- Extra held-back classes: none yet.
+
 ## Index
 
 `index.md` holds a generated block between `<!-- brain:index start -->` and `<!-- brain:index end -->`. Agents keep its lines in step by hand, one line at a time, and never rewrite the whole block:
 
-- A new note gets one line in the format the block already uses: `- [Title](/folder/slug.md): description (org, updated YYYY-MM-DD)`. A project goes under its phase heading, a knowledge note without `project` under `## Knowledge`.
+- A new note gets one line in the format the block already uses: `- [Title](/folder/slug.md): description (org, updated YYYY-MM-DD)`. A project goes under its phase heading, a knowledge note without `project` under `## Knowledge`, a person note under `## People`.
 - A note with `project: <slug>` goes in that project's notes map instead, and the `N notes` count in the project's index line goes up by one.
 - When you change a note's `description`, change its line.
 
@@ -174,6 +198,7 @@ The `brain` CLI is optional tooling, for a terminal. It is not needed to use thi
 - Never link across orgs, unless one side is `personal`. No tool checks this for you.
 - Never open `.confidential/` without being pointed at a note.
 - Never put history in a project file.
+- Never share brain content outside `outbox/`.
 - Never write secrets, passwords or tokens into any note.
 - Never overwrite a note you have not read.
 - Never let agent-side memory override the brain; propose a new connection as a capture marked Inferred:, never by editing notes.

@@ -160,3 +160,39 @@ test('the shipped template has AGENTS.md as its only agent instruction file', ()
   assert.ok(!fs.existsSync(path.join(s.dir, '.github', 'copilot-instructions.md')));
   assert.ok(fs.existsSync(path.join(s.dir, '.github', 'prompts', 'agenda.prompt.md')));
 });
+
+test('F1.6: the shipped template documents people notes', () => {
+  const s = setup();
+  init({ dir: s.dir, home: s.home });
+  const agents = read(s.dir, 'AGENTS.md');
+  assert.match(agents, /^\| `people\/<slug>\.md` \|/m);
+  assert.match(agents, /^\| `person` \| `people\/` \|.*`role`.*`aliases`/m);
+  assert.match(agents, /`## People`.*`\/people\/<slug>\.md`/);
+  assert.ok(read(s.dir, 'templates/project.md').includes('/people/<slug>.md'));
+});
+
+test('F2.23: the shipped template documents the outbox', () => {
+  const s = setup();
+  init({ dir: s.dir, home: s.home });
+  const agents = read(s.dir, 'AGENTS.md');
+  assert.match(agents, /^\| `outbox\/<audience>\/` \|/m);
+  assert.match(agents, /^\| `audience` \|.*`brain:`/m);
+  assert.match(agents, /^\| `outbox` \|.*`approved`.*`source_refs`/m);
+  assert.match(agents, /^## Outbox$/m);
+  assert.match(agents, /^## Outbox rules$/m);
+  assert.match(agents, /`outbox` skill/);
+  assert.match(agents, /never loosen/i);
+  assert.match(agents, /^\| `outbox\/<audience>\/` \|.*not indexed/m);
+});
+
+test('F2.24: the audience template holds the shared keys and is copied by init', () => {
+  const s = setup();
+  init({ dir: s.dir, home: s.home });
+  const aud = read(s.dir, 'templates/audience.md');
+  const front = aud.split('\n---\n')[0];
+  for (const k of ['type: audience', 'audience:', 'space:', 'rank:', 'approver:', 'roles:', 'brain:', '  org:', '  members:', '  receives:', '  context_sections:']) {
+    assert.match(front, new RegExp(`^${k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'm'), k);
+  }
+  assert.ok(aud.includes('target: {…}  # owned by the publisher, opaque to the brain'));
+  assert.match(aud, /detail level/i);
+});

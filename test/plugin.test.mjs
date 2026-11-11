@@ -38,7 +38,7 @@ test('builds plugin skills with ~/Ionian/brain and without the type key, and rem
 });
 
 test('Copilot prompt files say the same as the skills', () => {
-  for (const name of ['agenda', 'drop', 'triage', 'sync', 'aware']) {
+  for (const name of ['agenda', 'drop', 'triage', 'sync', 'aware', 'outbox']) {
     const skill = fs.readFileSync(path.join(ROOT, 'template/skills', name, 'SKILL.md'), 'utf8');
     const prompt = fs.readFileSync(path.join(ROOT, 'template/.github/prompts', `${name}.prompt.md`), 'utf8');
     assert.equal(body(prompt), body(skill), name);
@@ -46,9 +46,9 @@ test('Copilot prompt files say the same as the skills', () => {
 });
 
 const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(path.join(d, e.name)) : [path.join(d, e.name)]));
-const SKILLS = ['agenda', 'aware', 'drop', 'sync', 'triage'];
+const SKILLS = ['agenda', 'aware', 'drop', 'outbox', 'sync', 'triage'];
 
-test('the plugin holds plugin.json and the five SKILL.md files, nothing else', () => {
+test('the plugin holds plugin.json and the six SKILL.md files, nothing else', () => {
   const files = walk(path.join(ROOT, 'plugin')).map((f) => path.relative(path.join(ROOT, 'plugin'), f)).sort();
   assert.deepEqual(files, ['.claude-plugin/plugin.json', ...SKILLS.map((n) => `skills/${n}/SKILL.md`)]);
   assert.deepEqual(Object.keys(pluginFiles({ rootDir: ROOT })).sort(), files);
@@ -91,9 +91,10 @@ test('marketplace lists the plugin, with no manifest that would take precedence'
   const market = readJson(path.join(ROOT, '.claude-plugin/marketplace.json'));
   assert.equal(market.name, 'ionianlabs');
   assert.ok(market.owner?.name);
-  assert.equal(market.plugins.length, 1);
-  const [entry] = market.plugins;
+  const entry = market.plugins.find((p) => p.name === 'brain');
+  assert.ok(entry, 'a brain entry');
   assert.equal(entry.source, './plugin');
+  assert.deepEqual(market.plugins.filter((p) => p.source === './plugin').map((p) => p.name), ['brain']);
   const manifest = readJson(path.join(ROOT, 'plugin/.claude-plugin/plugin.json'));
   assert.equal(manifest.name, entry.name);
   assert.equal(manifest.version, readJson(path.join(ROOT, 'package.json')).version);
@@ -139,4 +140,80 @@ test('nothing tells the user or an agent to use npx', () => {
   const r = spawnSync('git', ['grep', '-n', '-i', '-I', '-E', '\\bnpx\\b', '--', '.'], { cwd: ROOT, encoding: 'utf8' });
   const hits = r.stdout.split('\n').filter((l) => l && !l.startsWith('test/plugin.test.mjs'));
   assert.deepEqual(hits, []);
+});
+
+test('F2.24 and F2.25: the outbox skill and its prompt exist, with the trigger phrases and the shared brain lookup', () => {
+  const skill = fs.readFileSync(path.join(ROOT, 'template/skills/outbox/SKILL.md'), 'utf8');
+  const prompt = fs.readFileSync(path.join(ROOT, 'template/.github/prompts/outbox.prompt.md'), 'utf8');
+  assert.equal(body(prompt), body(skill));
+  const descr = skill.match(/^description: (.*)$/m)[1];
+  for (const phrase of ['outbox', 'stage for <audience>', 'what can I share with <audience>', 'prepare <audience> update']) assert.ok(descr.includes(phrase), phrase);
+  const para = (t) => t.split('\n').find((l) => l.startsWith('Find the brain first.'));
+  const agenda = fs.readFileSync(path.join(ROOT, 'template/skills/agenda/SKILL.md'), 'utf8');
+  assert.equal(para(skill), para(agenda));
+});
+
+test('F2.8: the outbox skill names the skip categories for draft, deprecated and personal notes', () => {
+  const skill = fs.readFileSync(path.join(ROOT, 'template/skills/outbox/SKILL.md'), 'utf8');
+  for (const c of ['draft, skipped', 'deprecated, skipped', 'personal, skipped']) assert.ok(skill.includes(c), c);
+});
+
+test('F4.3 the spec and template Layout tables have an outbox row', () => {
+  for (const f of ['docs/spec.md', 'template/AGENTS.md']) {
+    assert.match(fs.readFileSync(path.join(ROOT, f), 'utf8'), /^\| `outbox\//m, f);
+  }
+});
+
+test('F4.3 every doc that lists the skills names all six', () => {
+  const six = ['agenda', 'drop', 'triage', 'sync', 'aware', 'outbox'];
+  for (const f of ['README.md', 'docs/copilot.md', 'docs/plugin.md', 'docs/spec.md', 'template/AGENTS.md']) {
+    const lines = fs.readFileSync(path.join(ROOT, f), 'utf8').split('\n');
+    const listing = lines.filter((l) => /`agenda`/.test(l) && /`triage`/.test(l));
+    assert.ok(listing.length > 0, f);
+    for (const l of listing) for (const n of six) assert.ok(l.includes('`' + n + '`'), `${f}: ${n} missing in: ${l}`);
+  }
+});
+
+test('F4.3 every manifest and the README say six skills and name outbox', () => {
+  const texts = {
+    'README.md': fs.readFileSync(path.join(ROOT, 'README.md'), 'utf8'),
+    'package.json': readJson(path.join(ROOT, 'package.json')).description,
+    'plugin.json': readJson(path.join(ROOT, 'plugin/.claude-plugin/plugin.json')).description,
+    'marketplace.json': readJson(path.join(ROOT, '.claude-plugin/marketplace.json')).plugins.find((p) => p.name === 'brain').description,
+  };
+  for (const [name, text] of Object.entries(texts)) {
+    assert.match(text, /\bsix skills\b/i, name);
+    assert.match(text, /outbox/, name);
+    assert.ok(!/\bfive skills\b/i.test(text), name);
+  }
+});
+
+const OUTBOX_COPIES = ['template/skills/outbox/SKILL.md', 'plugin/skills/outbox/SKILL.md', 'template/.github/prompts/outbox.prompt.md'];
+
+test('the outbox skill puts Handback before Scope, and rule 13 names the Self-check step', () => {
+  for (const rel of OUTBOX_COPIES) {
+  const text = fs.readFileSync(path.join(ROOT, rel), 'utf8');
+  const stepOf = (re) => Number(text.match(re)?.[1]);
+  const handback = stepOf(/^(\d+)\. Handback\b/m);
+  const scope = stepOf(/^(\d+)\. Scope\b/m);
+  const selfCheck = stepOf(/^(\d+)\. Self-check\b/m);
+  assert.ok(![handback, scope, selfCheck].some(Number.isNaN), 'step headings found');
+  assert.ok(handback < scope, 'Handback before Scope');
+  assert.match(text, new RegExp(`^13\\. Self-check, step ${selfCheck}\\.`, 'm'));
+  assert.match(text, /^\s+- Two lines: "not relevant to <audience>: N" and "already shared: N"\./m);
+  assert.match(text, /already shared: 0\n/);
+  assert.match(text, /^12\. Summary:.*confidential.*inbox.*other org.*draft.*deprecated.*personal.*already shared/m);
+  }
+});
+
+test('the outbox skill: title line is part of a person header, withdraw drops empty sections, handback goes under the date heading, multi-project slug', () => {
+  for (const rel of OUTBOX_COPIES) {
+  const text = fs.readFileSync(path.join(ROOT, rel), 'utf8');
+  assert.match(text, /frontmatter plus its title line/);
+  assert.match(text, /never anything below the title line/);
+  assert.match(text, /no items[^.\n]*remove (that|the) section'?s? heading/i);
+  assert.match(text, /`Done: published to <audience>: #4-#6`[^.\n]*under[^.\n]*`## YYYY-MM-DD`/);
+  assert.match(text, /joined with `-`/);
+  }
+  assert.match(fs.readFileSync(path.join(ROOT, 'template/AGENTS.md'), 'utf8'), /frontmatter and title line are shareable; the body below is private/);
 });

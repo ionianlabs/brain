@@ -76,6 +76,11 @@ export function buildBlock(brain) {
     .map((f) => entry(f))
     .sort(byUpdated);
   if (notes.length) sections.push(['## Knowledge', '', ...notes.map((i) => i.line)]);
+  const people = brain.files
+    .filter((f) => f.folder === 'people')
+    .map((f) => entry(f))
+    .sort(byUpdated);
+  if (people.length) sections.push(['## People', '', ...people.map((i) => i.line)]);
 
   const lines = [START];
   sections.forEach((s, i) => {

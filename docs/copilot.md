@@ -7,7 +7,7 @@ updated: 2026-11-02
 
 # Copilot from inside a work repo
 
-The simplest route is the plugin. It works in Copilot CLI and in VS Code, and it brings `agenda`, `drop`, `triage` and `sync` to every repo. See [the Brain plugin](plugin.md).
+The simplest route is the plugin. It works in Copilot CLI and in VS Code, and it brings the six skills (`agenda`, `drop`, `triage`, `sync`, `aware` and `outbox`) to every repo. See [the Brain plugin](plugin.md).
 
 If your organization blocks plugins, use one of the two routes below. Neither puts files into your work repo.
 

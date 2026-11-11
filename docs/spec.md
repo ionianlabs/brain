@@ -31,7 +31,8 @@ A brain is a conformant [Open Knowledge Format](https://github.com/GoogleCloudPl
 | `inbox/YYYY-MM-DD-<slug>.md` | Short notes, triaged later |
 | `knowledge/<slug>.md` | Durable reference material. A note may belong to one project (`project: <slug>`) |
 | `templates/` | Note templates |
-| `skills/<name>/SKILL.md`, `.github/prompts/<name>.prompt.md` | Example skills (`agenda`, `drop`, `triage`, `sync`, `aware`) |
+| `outbox/<audience>/` | The only path out of the brain. Everything in it is safe to share with that audience. Not a note folder, not indexed |
+| `skills/<name>/SKILL.md`, `.github/prompts/<name>.prompt.md` | Example skills (`agenda`, `drop`, `triage`, `sync`, `aware`, `outbox`) |
 | `.confidential/` | Off limits to agents unless you point them at a specific note. A dot-folder, so most search tools skip it. Gitignored by default. Lint never reads it |
 
 Slugs use lowercase `a-z`, `0-9` and hyphens only.

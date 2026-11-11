@@ -10,6 +10,7 @@ export const NOTE_FOLDERS = {
   logs: 'log',
   inbox: 'capture',
   knowledge: 'note',
+  people: 'person',
 };
 
 // Folders that never hold notes: version control, private notes, and dependency or

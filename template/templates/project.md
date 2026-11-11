@@ -24,7 +24,7 @@ History: [log](/logs/<slug>.md)
 
 ## People
 
-- <Name>, <role>: <when to talk to them>
+- [<Name>](/people/<slug>.md): <when to talk to them>
 
 ## Links
 

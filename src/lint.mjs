@@ -11,7 +11,7 @@ import { PRIOS, ITEM_KEYS, splitOpenItem, fieldMap, openItemLines, prefixProblem
 const PHASES = ['active', 'paused', 'done'];
 const STATUSES = ['draft', 'stable', 'deprecated'];
 const BASE_KEYS = ['description', 'tags', 'org', 'updated'];
-const EXTRA_KEYS = { project: ['phase', 'focus'], log: ['project'] };
+const EXTRA_KEYS = { project: ['phase', 'focus'], log: ['project'], person: ['role'] };
 const WORD_TARGET = 300;
 const WORD_LIMIT = 400;
 const OPEN_LIMIT = 15;

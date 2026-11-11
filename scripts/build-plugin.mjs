@@ -27,12 +27,12 @@ function manifest(pkg) {
     name: 'brain',
     displayName: 'Ionian Brain',
     version: pkg.version,
-    description: 'One memory for all agents, in plain markdown. Five skills (agenda, drop, triage, sync and aware) that read and write your brain folder directly. No CLI, agents or hooks.',
+    description: 'One memory for all agents, in plain markdown. Six skills (agenda, drop, triage, sync, aware and outbox) that read and write your brain folder directly. No CLI, agents or hooks.',
     author: { name: 'Ionian Labs', url: 'https://ionian.dev' },
     homepage: 'https://github.com/ionianlabs/brain',
     repository: 'https://github.com/ionianlabs/brain',
     license: pkg.license,
-    keywords: ['memory', 'markdown', 'agents', 'agenda', 'drop', 'triage', 'sync', 'aware'],
+    keywords: ['memory', 'markdown', 'agents', 'agenda', 'drop', 'triage', 'sync', 'aware', 'outbox'],
   };
 }
 

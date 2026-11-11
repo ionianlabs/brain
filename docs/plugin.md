@@ -7,7 +7,7 @@ updated: 2026-11-09
 
 # The Brain plugin
 
-The plugin brings the `agenda`, `drop`, `triage`, `sync` and `aware` skills to every repo and chat you work in. It holds those five skills and nothing else: no CLI, no agents and no hooks. The skills read and write the brain's markdown files directly, so they work wherever the agent can reach the brain folder, including the Claude desktop app with folder access.
+The plugin brings the `agenda`, `drop`, `triage`, `sync`, `aware` and `outbox` skills to every repo and chat you work in. It holds those six skills and nothing else: no CLI, no agents and no hooks. The skills read and write the brain's markdown files directly, so they work wherever the agent can reach the brain folder, including the Claude desktop app with folder access.
 
 The plugin is optional. The brain is the folder, and any agent that reads `AGENTS.md` can use it without the plugin.
 
