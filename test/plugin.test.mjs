@@ -142,12 +142,26 @@ test('nothing tells the user or an agent to use npx', () => {
   assert.deepEqual(hits, []);
 });
 
+test('no skill or prompt description contains the characters < or > (the hosted Claude app rejects them as XML tags)', () => {
+  const files = [
+    ...walk(path.join(ROOT, 'template/skills')),
+    ...walk(path.join(ROOT, 'plugin/skills')),
+    ...walk(path.join(ROOT, 'template/.github/prompts')),
+  ].filter((f) => f.endsWith('.md'));
+  assert.ok(files.length >= 18, `found ${files.length} files`);
+  for (const f of files) {
+    const m = fs.readFileSync(f, 'utf8').match(/^description: (.*)$/m);
+    assert.ok(m, `${f} has a description`);
+    assert.ok(!/[<>]/.test(m[1]), `${path.relative(ROOT, f)}: ${m[1]}`);
+  }
+});
+
 test('F2.24 and F2.25: the outbox skill and its prompt exist, with the trigger phrases and the shared brain lookup', () => {
   const skill = fs.readFileSync(path.join(ROOT, 'template/skills/outbox/SKILL.md'), 'utf8');
   const prompt = fs.readFileSync(path.join(ROOT, 'template/.github/prompts/outbox.prompt.md'), 'utf8');
   assert.equal(body(prompt), body(skill));
   const descr = skill.match(/^description: (.*)$/m)[1];
-  for (const phrase of ['outbox', 'stage for <audience>', 'what can I share with <audience>', 'prepare <audience> update']) assert.ok(descr.includes(phrase), phrase);
+  for (const phrase of ['"outbox"', '"stage for"', '"what can I share with"', '"prepare an audience update"', 'stage for steering']) assert.ok(descr.includes(phrase), phrase);
   const para = (t) => t.split('\n').find((l) => l.startsWith('Find the brain first.'));
   const agenda = fs.readFileSync(path.join(ROOT, 'template/skills/agenda/SKILL.md'), 'utf8');
   assert.equal(para(skill), para(agenda));

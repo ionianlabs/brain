@@ -1,7 +1,7 @@
 ---
 name: outbox
 type: skill
-description: Stage brain content for a shared audience, safely. Use when the user says "outbox", "stage for <audience>", "what can I share with <audience>" or "prepare <audience> update". Reads the audience definition, applies the barrier, proposes only rewritten items that are safe and relevant, and writes only what the owner approves, item by item, to outbox/<audience>/. Also withdraws items and logs what was shared. Never contacts an outlet.
+description: Stage brain content for a shared audience, safely. Use when the user says "outbox", "stage for" an audience, "what can I share with" an audience or "prepare an audience update", for example "stage for steering". Reads the audience definition, applies the barrier, proposes only rewritten items that are safe and relevant, and writes only what the owner approves, item by item, to that audience's folder under outbox/. Also withdraws items and logs what was shared. Never contacts an outlet.
 ---
 
 # Outbox
