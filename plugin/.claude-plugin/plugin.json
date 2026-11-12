@@ -1,7 +1,7 @@
 {
   "name": "brain",
   "displayName": "Ionian Brain",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "One memory for all agents, in plain markdown. Six skills (agenda, drop, triage, sync, aware and outbox) that read and write your brain folder directly. No CLI, agents or hooks.",
   "author": {
     "name": "Ionian Labs",
