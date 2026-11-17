@@ -38,7 +38,7 @@ test('builds plugin skills with ~/Ionian/brain and without the type key, and rem
 });
 
 test('Copilot prompt files say the same as the skills', () => {
-  for (const name of ['agenda', 'drop', 'triage', 'sync', 'aware', 'outbox']) {
+  for (const name of ['agenda', 'drop', 'triage', 'sync', 'aware', 'outbox', 'nucleus']) {
     const skill = fs.readFileSync(path.join(ROOT, 'template/skills', name, 'SKILL.md'), 'utf8');
     const prompt = fs.readFileSync(path.join(ROOT, 'template/.github/prompts', `${name}.prompt.md`), 'utf8');
     assert.equal(body(prompt), body(skill), name);
@@ -46,9 +46,9 @@ test('Copilot prompt files say the same as the skills', () => {
 });
 
 const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(path.join(d, e.name)) : [path.join(d, e.name)]));
-const SKILLS = ['agenda', 'aware', 'drop', 'outbox', 'sync', 'triage'];
+const SKILLS = ['agenda', 'aware', 'drop', 'nucleus', 'outbox', 'sync', 'triage'];
 
-test('the plugin holds plugin.json and the six SKILL.md files, nothing else', () => {
+test('the plugin holds plugin.json and the seven SKILL.md files, nothing else', () => {
   const files = walk(path.join(ROOT, 'plugin')).map((f) => path.relative(path.join(ROOT, 'plugin'), f)).sort();
   assert.deepEqual(files, ['.claude-plugin/plugin.json', ...SKILLS.map((n) => `skills/${n}/SKILL.md`)]);
   assert.deepEqual(Object.keys(pluginFiles({ rootDir: ROOT })).sort(), files);
@@ -148,7 +148,7 @@ test('no skill or prompt description contains the characters < or > (the hosted 
     ...walk(path.join(ROOT, 'plugin/skills')),
     ...walk(path.join(ROOT, 'template/.github/prompts')),
   ].filter((f) => f.endsWith('.md'));
-  assert.ok(files.length >= 18, `found ${files.length} files`);
+  assert.ok(files.length >= 21, `found ${files.length} files`);
   for (const f of files) {
     const m = fs.readFileSync(f, 'utf8').match(/^description: (.*)$/m);
     assert.ok(m, `${f} has a description`);
@@ -178,8 +178,8 @@ test('F4.3 the spec and template Layout tables have an outbox row', () => {
   }
 });
 
-test('F4.3 every doc that lists the skills names all six', () => {
-  const six = ['agenda', 'drop', 'triage', 'sync', 'aware', 'outbox'];
+test('F4.3 every doc that lists the skills names all seven', () => {
+  const six = ['agenda', 'drop', 'triage', 'sync', 'aware', 'outbox', 'nucleus'];
   for (const f of ['README.md', 'docs/copilot.md', 'docs/plugin.md', 'docs/spec.md', 'template/AGENTS.md']) {
     const lines = fs.readFileSync(path.join(ROOT, f), 'utf8').split('\n');
     const listing = lines.filter((l) => /`agenda`/.test(l) && /`triage`/.test(l));
@@ -188,7 +188,7 @@ test('F4.3 every doc that lists the skills names all six', () => {
   }
 });
 
-test('F4.3 every manifest and the README say six skills and name outbox', () => {
+test('F4.3 every manifest and the README say seven skills and name outbox and nucleus', () => {
   const texts = {
     'README.md': fs.readFileSync(path.join(ROOT, 'README.md'), 'utf8'),
     'package.json': readJson(path.join(ROOT, 'package.json')).description,
@@ -196,9 +196,10 @@ test('F4.3 every manifest and the README say six skills and name outbox', () => 
     'marketplace.json': readJson(path.join(ROOT, '.claude-plugin/marketplace.json')).plugins.find((p) => p.name === 'brain').description,
   };
   for (const [name, text] of Object.entries(texts)) {
-    assert.match(text, /\bsix skills\b/i, name);
+    assert.match(text, /\bseven skills\b/i, name);
     assert.match(text, /outbox/, name);
-    assert.ok(!/\bfive skills\b/i.test(text), name);
+    assert.match(text, /nucleus/, name);
+    assert.ok(!/\b(five|six) skills\b/i.test(text), name);
   }
 });
 
@@ -230,4 +231,63 @@ test('the outbox skill: title line is part of a person header, withdraw drops em
   assert.match(text, /joined with `-`/);
   }
   assert.match(fs.readFileSync(path.join(ROOT, 'template/AGENTS.md'), 'utf8'), /frontmatter and title line are shareable; the body below is private/);
+});
+
+const NUCLEUS_COPIES = ['template/skills/nucleus/SKILL.md', 'plugin/skills/nucleus/SKILL.md', 'template/.github/prompts/nucleus.prompt.md'];
+
+test('nucleus: the skill and its prompt exist, with the trigger phrases and the shared brain lookup', () => {
+  const skill = fs.readFileSync(path.join(ROOT, 'template/skills/nucleus/SKILL.md'), 'utf8');
+  const prompt = fs.readFileSync(path.join(ROOT, 'template/.github/prompts/nucleus.prompt.md'), 'utf8');
+  assert.equal(body(prompt), body(skill));
+  const descr = skill.match(/^description: (.*)$/m)[1];
+  for (const phrase of ['"nucleus"', '"what is the nucleus here"', '"what do I need to get moving"', '"what do I need from this meeting"', '"prep the questions for"', '"close the nucleus"']) assert.ok(descr.includes(phrase), phrase);
+  const para = (t) => t.split('\n').find((l) => l.startsWith('Find the brain first.'));
+  assert.equal(para(skill), para(fs.readFileSync(path.join(ROOT, 'template/skills/agenda/SKILL.md'), 'utf8')));
+});
+
+test('nucleus F1: the frame has the test, the safety question, four kinds and a five-line output', () => {
+  for (const rel of NUCLEUS_COPIES) {
+    const text = fs.readFileSync(path.join(ROOT, rel), 'utf8');
+    assert.ok(text.includes('"If I had only this, could I start?"'), rel);
+    assert.ok(text.includes('"What don\'t I know that I should?"'), rel);
+    assert.ok(text.includes('Nucleus: <the unblocker>\nKind: fact | their decision | my decision | first action\nHolder: <who has it, or "me">\nParked: <what waits>\nSituation: <the kind of situation, in general words>\n'), rel);
+    assert.match(text, /to verify/, rel);
+    assert.match(text, /`Inferred:`[^\n]*`status: draft`[^\n]*`stale_after`/, rel);
+  }
+});
+
+test('nucleus F2: the toolkit names ten tools, is never started unasked and caps the questions at five', () => {
+  for (const rel of NUCLEUS_COPIES) {
+    const text = fs.readFileSync(path.join(ROOT, rel), 'utf8');
+    for (const tool of ['Shell', 'Walk-through', 'Filters', 'Routing', 'Dependency order', 'Question forms', 'Pre-mortem', 'Catch-all', 'Touch points', 'Meeting fit']) {
+      assert.match(text, new RegExp(`^\\| ${tool} \\|`, 'm'), `${rel}: ${tool}`);
+    }
+    assert.match(text, /Never start layer 2 unasked/, rel);
+    assert.match(text, /At most five questions/, rel);
+    assert.ok(text.includes('"What do you know about this that I don\'t?"'), rel);
+  }
+});
+
+test('nucleus F3: one capture on request, statuses for the loop, and no other write', () => {
+  for (const rel of NUCLEUS_COPIES) {
+    const text = fs.readFileSync(path.join(ROOT, rel), 'utf8');
+    assert.ok(text.includes('inbox/YYYY-MM-DD-nucleus-<slug>.md'), rel);
+    assert.match(text, /`answered`, `partly` or `open`/, rel);
+    assert.match(text, /`Said\(Name\):`/, rel);
+    assert.match(text, /Never edit a project file, a log or a knowledge note/, rel);
+    assert.match(text, /Never overwrite/, rel);
+    assert.match(text, /Never open `\.confidential\/`/, rel);
+    assert.match(text, /Never contact anyone/, rel);
+    assert.match(text, /no name of a person, org or project/, rel);
+  }
+});
+
+test('nucleus: the Copilot prompt may edit files, for the capture', () => {
+  const prompt = fs.readFileSync(path.join(ROOT, 'template/.github/prompts/nucleus.prompt.md'), 'utf8');
+  assert.match(prompt, /^tools: \['search\/codebase', 'edit\/editFiles'\]$/m);
+  assert.match(prompt, /^type: prompt$/m);
+});
+
+test('the spec describes the nucleus skill', () => {
+  assert.match(fs.readFileSync(path.join(ROOT, 'docs/spec.md'), 'utf8'), /^### `nucleus`$/m);
 });

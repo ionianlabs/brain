@@ -32,7 +32,7 @@ A brain is a conformant [Open Knowledge Format](https://github.com/GoogleCloudPl
 | `knowledge/<slug>.md` | Durable reference material. A note may belong to one project (`project: <slug>`) |
 | `templates/` | Note templates |
 | `outbox/<audience>/` | The only path out of the brain. Everything in it is safe to share with that audience. Not a note folder, not indexed |
-| `skills/<name>/SKILL.md`, `.github/prompts/<name>.prompt.md` | Example skills (`agenda`, `drop`, `triage`, `sync`, `aware`, `outbox`) |
+| `skills/<name>/SKILL.md`, `.github/prompts/<name>.prompt.md` | Example skills (`agenda`, `drop`, `triage`, `sync`, `aware`, `outbox`, `nucleus`) |
 | `.confidential/` | Off limits to agents unless you point them at a specific note. A dot-folder, so most search tools skip it. Gitignored by default. Lint never reads it |
 
 Slugs use lowercase `a-z`, `0-9` and hyphens only.
@@ -340,6 +340,10 @@ Replaces `handover`; "handover", "end session", "wrap up" and "save to brain" st
 ### `aware`
 
 The triage specialization for `source: flow` day files: it walks Ionian Flow's proposals, files what the owner accepts and archives the file. See [works with Flow](works-with-flow.md).
+
+### `nucleus`
+
+A working method for one thing at a time: find the smallest answer, decision or action that gets it moving. Runs only when the owner asks. The frame is always run and prints five lines in the chat (`Nucleus`, `Kind`, `Holder`, `Parked`, `Situation`); a candidate is the nucleus when it passes the test "If I had only this, could I start?". A toolkit of ten tools is offered, never started unasked, and yields a prep note of at most five questions. Read-only by default: on request it saves the prep note as one capture, `inbox/YYYY-MM-DD-nucleus-<slug>.md`, and after the touch point it closes the loop (record, check, release, next nucleus). It never edits a project file, a log or a knowledge note, and never contacts anyone. Design in [designs/nucleus.md](designs/nucleus.md).
 
 ### Plugin
 
