@@ -5,6 +5,8 @@ description: Capture a thought into the brain inbox from any chat. Use when the 
 
 # Drop
 
+**Works on:** One thought, in any chat. **Question:** How do I keep this without losing my place?
+
 Capture one thought into the brain's inbox. This is the one cheap, safe write path from any context: it writes a single new file and nothing else.
 
 Find the brain first. Use the brain folder named in your session context, if there is one. Otherwise use the folder the user shared or named in this conversation that has an `AGENTS.md` at its root. Otherwise use the `BRAIN_DIR` environment variable if it is set, then `$IONIAN_HOME/brain` if `IONIAN_HOME` is set, then `~/Ionian/brain`. Below, `<brain>` is that folder. If no folder with an `AGENTS.md` is found, say so and point to https://github.com/ionianlabs/brain to set one up. Then stop.

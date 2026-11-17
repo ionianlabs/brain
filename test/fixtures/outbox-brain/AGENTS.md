@@ -24,7 +24,7 @@ If any other file disagrees with this one, this file wins.
 | `people/<slug>.md` | One note per person per org. The frontmatter and title line are shareable; the body below is private context that never leaves the brain |
 | `outbox/<audience>/` | The only path out of the brain. Everything in it is safe to share with that audience. Not a note folder, not indexed |
 | `templates/` | Starting points for new notes |
-| `skills/`, `.github/prompts/` | Example skills: `agenda`, `drop`, `triage`, `sync`, `aware`, `outbox` and `nucleus` |
+| `skills/`, `.github/prompts/` | Example skills: `agenda`, `drop`, `triage`, `sync`, `aware`, `outbox`, `nucleus` and `blind-spots` |
 | `.confidential/` | Off limits. See Confidential |
 
 Slugs use lowercase `a-z`, `0-9` and hyphens only.

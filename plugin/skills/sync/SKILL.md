@@ -5,6 +5,8 @@ description: Write a working session back to the brain for one project. Use when
 
 # Sync
 
+**Works on:** One working session, for one project. **Question:** What changed, and where do things stand now?
+
 End a working session for one project. Update its state file and prepend log entries. You may be running inside a work repo, not the brain folder. Sync and triage are the only skills that write to project files. Every other session writes captures only.
 
 Find the brain first. Use the brain folder named in your session context, if there is one. Otherwise use the folder the user shared or named in this conversation that has an `AGENTS.md` at its root. Otherwise use the `BRAIN_DIR` environment variable if it is set, then `$IONIAN_HOME/brain` if `IONIAN_HOME` is set, then `~/Ionian/brain`. Below, `<brain>` is that folder. If no folder with an `AGENTS.md` is found, say so and point to https://github.com/ionianlabs/brain to set one up. Then stop.

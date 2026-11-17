@@ -5,6 +5,8 @@ description: Read-only view of what needs the owner now. Use when the user says 
 
 # Agenda
 
+**Works on:** The open items that are written down. **Question:** What needs me now?
+
 Show what needs the owner now, inside a hard attention budget, and fold the rest into counts. This skill is read-only: never edit, create, move or delete anything.
 
 Find the brain first. Use the brain folder named in your session context, if there is one. Otherwise use the folder the user shared or named in this conversation that has an `AGENTS.md` at its root. Otherwise use the `BRAIN_DIR` environment variable if it is set, then `$IONIAN_HOME/brain` if `IONIAN_HOME` is set, then `~/Ionian/brain`. Below, `<brain>` is that folder. If no folder with an `AGENTS.md` is found, say so and point to https://github.com/ionianlabs/brain to set one up. Then stop.

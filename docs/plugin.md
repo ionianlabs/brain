@@ -7,11 +7,24 @@ updated: 2026-11-09
 
 # The Brain plugin
 
-The plugin brings the `agenda`, `drop`, `triage`, `sync`, `aware`, `outbox` and `nucleus` skills to every repo and chat you work in. It holds those seven skills and nothing else: no CLI, no agents and no hooks. The skills read and write the brain's markdown files directly, so they work wherever the agent can reach the brain folder, including the Claude desktop app with folder access.
+The plugin brings the `agenda`, `drop`, `triage`, `sync`, `aware`, `outbox`, `nucleus` and `blind-spots` skills to every repo and chat you work in. It holds those eight skills and nothing else: no CLI, no agents and no hooks. The skills read and write the brain's markdown files directly, so they work wherever the agent can reach the brain folder, including the Claude desktop app with folder access.
 
 The plugin is optional. The brain is the folder, and any agent that reads `AGENTS.md` can use it without the plugin.
 
 One plugin folder serves Claude Code, the Claude desktop app, GitHub Copilot CLI and Copilot in VS Code. They all read the same format.
+
+Each skill works on one thing and answers one question:
+
+| Skill | Works on | Question it answers |
+|---|---|---|
+| `agenda` | The open items that are written down | What needs me now? |
+| `drop` | One thought, in any chat | How do I keep this without losing my place? |
+| `triage` | The captures waiting in the inbox | Where does each one belong? |
+| `sync` | One working session, for one project | What changed, and where do things stand now? |
+| `aware` | What Ionian Flow's Aware proposed from meetings | Which proposals do I accept? |
+| `outbox` | Brain content, for one named audience | What is safe to share with them? |
+| `nucleus` | One named thing | What is the smallest unblocker? |
+| `blind-spots` | The dated events of the coming weeks | What should exist by now and does not? |
 
 ## Before you install.
 

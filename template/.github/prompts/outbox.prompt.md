@@ -8,6 +8,8 @@ tools: ['search/codebase', 'edit/editFiles']
 
 # Outbox
 
+**Works on:** Brain content, for one named audience. **Question:** What is safe to share with them?
+
 The only path from the brain to anything shared. Content leaves the brain only as approved, rewritten items in `outbox/<audience>/`. Everything in that folder must be safe to share with that audience, the manifest included. You never contact an outlet and never publish. A separate publisher reads the folder.
 
 Find the brain first. Use the brain folder named in your session context, if there is one. Otherwise use the folder the user shared or named in this conversation that has an `AGENTS.md` at its root. Otherwise use the `BRAIN_DIR` environment variable if it is set, then `$IONIAN_HOME/brain` if `IONIAN_HOME` is set, then `{{BRAIN_DIR}}`. Below, `<brain>` is that folder. If no folder with an `AGENTS.md` is found, say so and point to https://github.com/ionianlabs/brain to set one up. Then stop.

@@ -1,13 +1,26 @@
 ---
 type: guide
-description: Use the agenda and sync skills from any work repo with GitHub Copilot, with or without the plugin
+description: Use the eight Brain skills from any work repo with GitHub Copilot, with or without the plugin
 tags: [copilot, skills, prompts, setup]
-updated: 2026-11-02
+updated: 2026-11-17
 ---
 
 # Copilot from inside a work repo
 
-The simplest route is the plugin. It works in Copilot CLI and in VS Code, and it brings the seven skills (`agenda`, `drop`, `triage`, `sync`, `aware`, `outbox` and `nucleus`) to every repo. See [the Brain plugin](plugin.md).
+The simplest route is the plugin. It works in Copilot CLI and in VS Code, and it brings the eight skills (`agenda`, `drop`, `triage`, `sync`, `aware`, `outbox`, `nucleus` and `blind-spots`) to every repo. See [the Brain plugin](plugin.md).
+
+Each skill works on one thing and answers one question. In Copilot, run it with its slash command, for example `/agenda`, `/nucleus` or `/blind-spots`:
+
+| Skill | Works on | Question it answers |
+|---|---|---|
+| `agenda` | The open items that are written down | What needs me now? |
+| `drop` | One thought, in any chat | How do I keep this without losing my place? |
+| `triage` | The captures waiting in the inbox | Where does each one belong? |
+| `sync` | One working session, for one project | What changed, and where do things stand now? |
+| `aware` | What Ionian Flow's Aware proposed from meetings | Which proposals do I accept? |
+| `outbox` | Brain content, for one named audience | What is safe to share with them? |
+| `nucleus` | One named thing | What is the smallest unblocker? |
+| `blind-spots` | The dated events of the coming weeks | What should exist by now and does not? |
 
 If your organization blocks plugins, use one of the two routes below. Neither puts files into your work repo.
 
@@ -17,10 +30,10 @@ Copilot reads personal skills from `~/.copilot/skills/`, in VS Code and in Copil
 
 ```sh
 mkdir -p ~/.copilot/skills
-cp -R ~/Ionian/brain/skills/agenda ~/Ionian/brain/skills/drop ~/Ionian/brain/skills/triage ~/Ionian/brain/skills/sync ~/.copilot/skills/
+cp -R ~/Ionian/brain/skills/* ~/.copilot/skills/
 ```
 
-Then run `/agenda` or `/sync`. The skills run their steps inline. The paths inside the skills were filled in with the absolute path of your brain when you ran `init`, so the copies work from any folder. If you also install the plugin, remove these copies.
+Then run `/agenda`, `/sync` or any of the others. The skills run their steps inline. The paths inside the skills were filled in with the absolute path of your brain when you ran `init`, so the copies work from any folder. If you also install the plugin, remove these copies.
 
 ## Prompt files.
 

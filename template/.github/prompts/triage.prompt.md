@@ -8,6 +8,8 @@ tools: ['search/codebase', 'edit/editFiles', 'execute/runInTerminal']
 
 # Triage
 
+**Works on:** The captures waiting in the inbox. **Question:** Where does each one belong?
+
 Walk the waiting captures one by one and place each where the owner decides. Triage and sync are the only skills that write to project files. `## Open` grows only through an explicit owner decision with a priority attached.
 
 Find the brain first. Use the brain folder named in your session context, if there is one. Otherwise use the folder the user shared or named in this conversation that has an `AGENTS.md` at its root. Otherwise use the `BRAIN_DIR` environment variable if it is set, then `$IONIAN_HOME/brain` if `IONIAN_HOME` is set, then `{{BRAIN_DIR}}`. Below, `<brain>` is that folder. If no folder with an `AGENTS.md` is found, say so and point to https://github.com/ionianlabs/brain to set one up. Then stop.
