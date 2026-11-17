@@ -38,7 +38,7 @@ test('builds plugin skills with ~/Ionian/brain and without the type key, and rem
 });
 
 test('Copilot prompt files say the same as the skills', () => {
-  for (const name of ['agenda', 'drop', 'triage', 'sync', 'aware', 'outbox', 'nucleus', 'blind-spots']) {
+  for (const name of ['agenda', 'drop', 'triage', 'sync', 'aware', 'outbox', 'nucleus', 'radar']) {
     const skill = fs.readFileSync(path.join(ROOT, 'template/skills', name, 'SKILL.md'), 'utf8');
     const prompt = fs.readFileSync(path.join(ROOT, 'template/.github/prompts', `${name}.prompt.md`), 'utf8');
     assert.equal(body(prompt), body(skill), name);
@@ -46,7 +46,7 @@ test('Copilot prompt files say the same as the skills', () => {
 });
 
 const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(path.join(d, e.name)) : [path.join(d, e.name)]));
-const SKILLS = ['agenda', 'aware', 'blind-spots', 'drop', 'nucleus', 'outbox', 'sync', 'triage'];
+const SKILLS = ['agenda', 'aware', 'drop', 'nucleus', 'outbox', 'radar', 'sync', 'triage'];
 
 test('the plugin holds plugin.json and the eight SKILL.md files, nothing else', () => {
   const files = walk(path.join(ROOT, 'plugin')).map((f) => path.relative(path.join(ROOT, 'plugin'), f)).sort();
@@ -179,7 +179,7 @@ test('F4.3 the spec and template Layout tables have an outbox row', () => {
 });
 
 test('F4.3 every doc that lists the skills names all eight', () => {
-  const six = ['agenda', 'drop', 'triage', 'sync', 'aware', 'outbox', 'nucleus', 'blind-spots'];
+  const six = ['agenda', 'drop', 'triage', 'sync', 'aware', 'outbox', 'nucleus', 'radar'];
   for (const f of ['README.md', 'docs/copilot.md', 'docs/plugin.md', 'docs/spec.md', 'template/AGENTS.md']) {
     const lines = fs.readFileSync(path.join(ROOT, f), 'utf8').split('\n');
     const listing = lines.filter((l) => /`agenda`/.test(l) && /`triage`/.test(l));
@@ -188,7 +188,7 @@ test('F4.3 every doc that lists the skills names all eight', () => {
   }
 });
 
-test('F4.3 every manifest and the README say eight skills and name outbox, nucleus and blind-spots', () => {
+test('F4.3 every manifest and the README say eight skills and name outbox, nucleus and radar', () => {
   const texts = {
     'README.md': fs.readFileSync(path.join(ROOT, 'README.md'), 'utf8'),
     'package.json': readJson(path.join(ROOT, 'package.json')).description,
@@ -197,7 +197,7 @@ test('F4.3 every manifest and the README say eight skills and name outbox, nucle
   };
   for (const [name, text] of Object.entries(texts)) {
     assert.match(text, /\beight skills\b/i, name);
-    assert.match(text, /blind-spots/, name);
+    assert.match(text, /radar/, name);
     assert.match(text, /outbox/, name);
     assert.match(text, /nucleus/, name);
     assert.ok(!/\b(five|six|seven) skills\b/i.test(text), name);
@@ -293,20 +293,20 @@ test('the spec describes the nucleus skill', () => {
   assert.match(fs.readFileSync(path.join(ROOT, 'docs/spec.md'), 'utf8'), /^### `nucleus`$/m);
 });
 
-const BLIND_COPIES = ['template/skills/blind-spots/SKILL.md', 'plugin/skills/blind-spots/SKILL.md', 'template/.github/prompts/blind-spots.prompt.md'];
+const BLIND_COPIES = ['template/skills/radar/SKILL.md', 'plugin/skills/radar/SKILL.md', 'template/.github/prompts/radar.prompt.md'];
 
-test('blind-spots: the skill and its prompt exist, with the trigger phrases and the shared brain lookup', () => {
-  const skill = fs.readFileSync(path.join(ROOT, 'template/skills/blind-spots/SKILL.md'), 'utf8');
-  const prompt = fs.readFileSync(path.join(ROOT, 'template/.github/prompts/blind-spots.prompt.md'), 'utf8');
+test('radar: the skill and its prompt exist, with the trigger phrases and the shared brain lookup', () => {
+  const skill = fs.readFileSync(path.join(ROOT, 'template/skills/radar/SKILL.md'), 'utf8');
+  const prompt = fs.readFileSync(path.join(ROOT, 'template/.github/prompts/radar.prompt.md'), 'utf8');
   assert.equal(body(prompt), body(skill));
   assert.match(prompt, /^tools: \['search\/codebase', 'edit\/editFiles'\]$/m);
   const descr = skill.match(/^description: (.*)$/m)[1];
-  for (const phrase of ['"blind spots"', '"gap check"', '"what am I missing"']) assert.ok(descr.includes(phrase), phrase);
+  for (const phrase of ['"radar"', '"blind spots"', '"gap check"', '"what am I missing"']) assert.ok(descr.includes(phrase), phrase);
   const para = (t) => t.split('\n').find((l) => l.startsWith('Find the brain first.'));
   assert.equal(para(skill), para(fs.readFileSync(path.join(ROOT, 'template/skills/agenda/SKILL.md'), 'utf8')));
 });
 
-test('blind-spots: plans back from dated events, drops what is covered, caps at ten and names the project', () => {
+test('radar: plans back from dated events, drops what is covered, caps at ten and names the project', () => {
   for (const rel of BLIND_COPIES) {
     const text = fs.readFileSync(path.join(ROOT, rel), 'utf8');
     for (const check of ['Decisions', 'Information', 'Inputs', 'People', 'Prep', 'Rhythm', 'Promises']) assert.match(text, new RegExp(`^\\| ${check} \\|`, 'm'), `${rel}: ${check}`);
@@ -319,10 +319,10 @@ test('blind-spots: plans back from dated events, drops what is covered, caps at 
   }
 });
 
-test('blind-spots: read-only, one capture per org on request, org boundary and no confidential folder', () => {
+test('radar: read-only, one capture per org on request, org boundary and no confidential folder', () => {
   for (const rel of BLIND_COPIES) {
     const text = fs.readFileSync(path.join(ROOT, rel), 'utf8');
-    assert.ok(text.includes('inbox/YYYY-MM-DD-blind-spots-<org>.md'), rel);
+    assert.ok(text.includes('inbox/YYYY-MM-DD-radar-<org>.md'), rel);
     assert.match(text, /one capture per org/i, rel);
     assert.match(text, /`Inferred:`/, rel);
     assert.match(text, /Never overwrite/, rel);
@@ -333,8 +333,8 @@ test('blind-spots: read-only, one capture per org on request, org boundary and n
   }
 });
 
-test('the spec describes the blind-spots skill', () => {
-  assert.match(fs.readFileSync(path.join(ROOT, 'docs/spec.md'), 'utf8'), /^### `blind-spots`$/m);
+test('the spec describes the radar skill', () => {
+  assert.match(fs.readFileSync(path.join(ROOT, 'docs/spec.md'), 'utf8'), /^### `radar`$/m);
 });
 
 test('every skill states what it works on and the question it answers, and the README, plugin and Copilot docs carry the same table', () => {

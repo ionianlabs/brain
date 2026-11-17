@@ -1,7 +1,7 @@
-# Blind spots
+# Radar
 
 Status: approved
-Slug: blind-spots
+Slug: radar
 Date: 2026-11-17
 
 ## Problem
@@ -22,9 +22,9 @@ The brain shows what is written down. `agenda` ranks the open items, and `nucleu
 |---|---|---|---|
 | `agenda` | Open items that exist | What needs me now? | Ranked items |
 | `nucleus` | One thing the owner names | What is the smallest unblocker? | One nucleus |
-| `blind-spots` | Dated events of the horizon | What should exist by now and does not? | Up to 10 gaps |
+| `radar` | Dated events of the horizon | What should exist by now and does not? | Up to 10 gaps |
 
-`nucleus` has a safety question and a pre-mortem, but both work inside the one thing the owner brought. `blind-spots` scans all active projects for things the owner did not bring. The two chain: a gap found here is a thing to run `nucleus` on. The overlap with `agenda` is removed by rule: a gap that is already an open item with an owner and a due date before the event is dropped.
+`nucleus` has a safety question and a pre-mortem, but both work inside the one thing the owner brought. `radar` scans all active projects for things the owner did not bring. The two chain: a gap found here is a thing to run `nucleus` on. The overlap with `agenda` is removed by rule: a gap that is already an open item with an owner and a due date before the event is dropped.
 
 ## Out of scope
 
@@ -67,15 +67,15 @@ Scenarios:
 ### F3. Saving (P3)
 
 Scenarios:
-- F3.1 Given the owner agrees, then the skill writes one capture per org that has gaps, `inbox/YYYY-MM-DD-blind-spots-<org>.md`, with `type: capture`, `source: chat`, the tag `blind-spots` and that `org`. Each bullet carries `Inferred:`. It never overwrites, adds no index line and edits no other file.
+- F3.1 Given the owner agrees, then the skill writes one capture per org that has gaps, `inbox/YYYY-MM-DD-radar-<org>.md`, with `type: capture`, `source: chat`, the tag `radar` and that `org`. Each bullet carries `Inferred:`. It never overwrites, adds no index line and edits no other file.
 - F3.2 Given no agreement, then no file is created or changed.
 
 ### F4. Packaging: eight skills (P4)
 
 Scenarios:
-- F4.1 `npm test` passes with `SKILLS` holding eight names, and `plugin/skills/blind-spots/SKILL.md` is built.
-- F4.2 The prompt `template/.github/prompts/blind-spots.prompt.md` has the same body as the skill.
-- F4.3 The README, the manifests, the Layout tables and the docs that list the skills name `blind-spots` and say eight skills where they give a count.
+- F4.1 `npm test` passes with `SKILLS` holding eight names, and `plugin/skills/radar/SKILL.md` is built.
+- F4.2 The prompt `template/.github/prompts/radar.prompt.md` has the same body as the skill.
+- F4.3 The README, the manifests, the Layout tables and the docs that list the skills name `radar` and say eight skills where they give a count.
 - F4.4 Every example is invented: project `launch`, person `Sam Lee`, dates that belong to no real plan.
 
 Testability: unit for F4 and for text assertions on the skill; F1 to F3 by a manual run.
@@ -120,3 +120,4 @@ None. It links to `nucleus` by name only.
   7. A link to `nucleus` as the next step for a single gap.
 - Approved (2026-11-17): "approve". The owner kept one capture per org.
   8. After approval of the design, each of the eight skills gained a line naming what it works on and the question it answers, with the same table in the README and the docs.
+- Change with owner consent (2026-11-17): the skill is renamed to `radar`, so that every skill has a one-word name. "Blind spots" stays as a trigger phrase and as the title of the report. The capture file and its tag follow the new name. Version 0.9.1.

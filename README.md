@@ -13,7 +13,7 @@ Every agent chat starts at zero. The context lives in your head, in old chats an
 
 ## Quickstart.
 
-Add the plugin to your agent. It holds eight skills and nothing else: `agenda`, `drop`, `triage`, `sync`, `aware`, `outbox`, `nucleus` and `blind-spots`. It needs no CLI, no Node and no hook, so it works in Claude Code and in the Claude desktop app with access to your brain folder. The skills read and write the markdown files directly.
+Add the plugin to your agent. It holds eight skills and nothing else: `agenda`, `drop`, `triage`, `sync`, `aware`, `outbox`, `nucleus` and `radar`. It needs no CLI, no Node and no hook, so it works in Claude Code and in the Claude desktop app with access to your brain folder. The skills read and write the markdown files directly.
 
 | Agent | Install | Run |
 |---|---|---|
@@ -62,7 +62,7 @@ Brain also works next to Ionian Harness. See [Works with Ionian Harness](https:/
   inbox/           quick captures, triaged at the next session
   knowledge/       durable reference notes
   templates/       note templates
-  skills/          example skills: agenda, drop, triage, sync, aware, outbox, nucleus, blind-spots
+  skills/          example skills: agenda, drop, triage, sync, aware, outbox, nucleus, radar
   .confidential/   notes agents leave alone (gitignored)
 ```
 
@@ -116,9 +116,9 @@ Each skill works on one thing and answers one question. None of them overlaps wi
 | `aware` | What Ionian Flow's Aware proposed from meetings | Which proposals do I accept? |
 | `outbox` | Brain content, for one named audience | What is safe to share with them? |
 | `nucleus` | One named thing | What is the smallest unblocker? |
-| `blind-spots` | The dated events of the coming weeks | What should exist by now and does not? |
+| `radar` | The dated events of the coming weeks | What should exist by now and does not? |
 
-`agenda` ranks what is written down, `blind-spots` looks for what is not, and `nucleus` reduces one thing to its smallest next step.
+`agenda` ranks what is written down, `radar` looks for what is not, and `nucleus` reduces one thing to its smallest next step.
 
 ## What Brain adds on top of OKF.
 
@@ -128,7 +128,7 @@ Each skill works on one thing and answers one question. None of them overlaps wi
 | **State and history split** | A short current file per project (about 300 words plus open items), project notes read on demand, and an append-only log. | Reads stay cheap and nothing is lost. |
 | **Boundaries** | An `org` key keeps clients apart. `.confidential/` holds notes agents leave alone. | Safe across several clients. OKF has no access control. |
 | **Capture path** | `inbox/`, triaged at the next session. | Aimed at the real bottleneck, which is writing. |
-| **Daily payoff** | `agenda`, `drop`, `triage`, `sync`, `aware`, `outbox`, `nucleus` and `blind-spots` example skills. | You feel the value the same day. |
+| **Daily payoff** | `agenda`, `drop`, `triage`, `sync`, `aware`, `outbox`, `nucleus` and `radar` example skills. | You feel the value the same day. |
 | **Hygiene** | The skills follow the org boundary and budget rules. The optional `brain lint` checks staleness, broken links, tag near-duplicates, cross-org links and OKF conformance. | The folder stays trustworthy. |
 
 A brain stays a valid OKF v0.2 bundle, so any OKF tool can read it.
@@ -136,7 +136,7 @@ A brain stays a valid OKF v0.2 bundle, so any OKF tool can read it.
 ## Where it works.
 
 - **Claude desktop app.** The plugin, with the brain folder shared. The skills read and write the files, no terminal needed.
-- **Claude Code.** The plugin, or `AGENTS.md` (read natively) and the `agenda`, `drop`, `triage`, `sync`, `aware`, `outbox`, `nucleus` and `blind-spots` skills in the brain folder. Without the plugin, `init --link-skills` symlinks the skills into `~/.claude/skills/`, so they work in every project. Existing skills with the same name are left alone.
+- **Claude Code.** The plugin, or `AGENTS.md` (read natively) and the `agenda`, `drop`, `triage`, `sync`, `aware`, `outbox`, `nucleus` and `radar` skills in the brain folder. Without the plugin, `init --link-skills` symlinks the skills into `~/.claude/skills/`, so they work in every project. Existing skills with the same name are left alone.
 - **GitHub Copilot.** The plugin, in Copilot CLI and in VS Code. Without it, `AGENTS.md` (read natively) and prompt files such as `/agenda` and `/sync`. See [docs/copilot.md](https://github.com/ionianlabs/brain/blob/main/docs/copilot.md) to use them from inside a work repo.
 - **Any agent that can read a file.** Point it at `AGENTS.md`.
 

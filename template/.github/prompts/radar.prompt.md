@@ -1,10 +1,12 @@
 ---
-name: blind-spots
-type: skill
-description: Find what is missing before the dated events of the coming weeks. Use when the user says "blind spots", "gap check" or "what am I missing". Plans back from each meeting and deadline in the next two to three weeks and lists at most 10 gaps, each a decision, a piece of information, an input or a prep that should exist by now and is not in the brain. Read-only. On request it saves the gaps as inbox captures.
+name: radar
+type: prompt
+description: Find what is missing before the dated events of the coming weeks. Run with /radar.
+agent: agent
+tools: ['search/codebase', 'edit/editFiles']
 ---
 
-# Blind spots
+# Radar
 
 **Works on:** The dated events of the coming weeks. **Question:** What should exist by now and does not?
 
@@ -59,7 +61,7 @@ Very short. At most 10 gaps, grouped by when they must be closed. One line each:
 ### Before the go-live review, Wed 25 Nov
 - launch: the scope decision has no date, and the review needs it.
 
-*4 more gaps. Say "blind spots everything" to see them.*
+*4 more gaps. Say "radar everything" to see them.*
 ```
 
 - A gap you concluded from an `Inferred:` bullet, or from a note with `status: draft`, says so in the line: "(inferred)".
@@ -72,9 +74,9 @@ Then offer two things, once, in one line: to save the gaps as captures, and to r
 
 ## Saving the gaps
 
-Only after the owner agrees. Write one capture per org that has gaps, following `<brain>/templates/capture.md`, to `<brain>/inbox/YYYY-MM-DD-blind-spots-<org>.md` with today's date. If the name exists, append `-2`, `-3`. Never overwrite a file.
+Only after the owner agrees. Write one capture per org that has gaps, following `<brain>/templates/capture.md`, to `<brain>/inbox/YYYY-MM-DD-radar-<org>.md` with today's date. If the name exists, append `-2`, `-3`. Never overwrite a file.
 
-- Frontmatter: `type: capture`, `source: chat`, `tags` with `blind-spots`, `org` of those gaps, `description` in one line, `updated` today.
+- Frontmatter: `type: capture`, `source: chat`, `tags` with `radar`, `org` of those gaps, `description` in one line, `updated` today.
 - Body: `# Blind spots, <date>`, then one bullet per gap of that org, each with its project and its close-by date. Every bullet carries `Inferred:`, because a gap is your conclusion until the owner confirms it.
 - Leave out the gaps the owner dropped. No index line and no other write. `triage` places the captures later.
 

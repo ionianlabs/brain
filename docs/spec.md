@@ -32,7 +32,7 @@ A brain is a conformant [Open Knowledge Format](https://github.com/GoogleCloudPl
 | `knowledge/<slug>.md` | Durable reference material. A note may belong to one project (`project: <slug>`) |
 | `templates/` | Note templates |
 | `outbox/<audience>/` | The only path out of the brain. Everything in it is safe to share with that audience. Not a note folder, not indexed |
-| `skills/<name>/SKILL.md`, `.github/prompts/<name>.prompt.md` | Example skills (`agenda`, `drop`, `triage`, `sync`, `aware`, `outbox`, `nucleus`, `blind-spots`) |
+| `skills/<name>/SKILL.md`, `.github/prompts/<name>.prompt.md` | Example skills (`agenda`, `drop`, `triage`, `sync`, `aware`, `outbox`, `nucleus`, `radar`) |
 | `.confidential/` | Off limits to agents unless you point them at a specific note. A dot-folder, so most search tools skip it. Gitignored by default. Lint never reads it |
 
 Slugs use lowercase `a-z`, `0-9` and hyphens only.
@@ -345,9 +345,9 @@ The triage specialization for `source: flow` day files: it walks Ionian Flow's p
 
 A working method for one thing at a time: find the smallest answer, decision or action that gets it moving. Runs only when the owner asks. The frame is always run and prints five lines in the chat (`Nucleus`, `Kind`, `Holder`, `Parked`, `Situation`); a candidate is the nucleus when it passes the test "If I had only this, could I start?". A toolkit of ten tools is offered, never started unasked, and yields a prep note of at most five questions. Read-only by default: on request it saves the prep note as one capture, `inbox/YYYY-MM-DD-nucleus-<slug>.md`, and after the touch point it closes the loop (record, check, release, next nucleus). It never edits a project file, a log or a knowledge note, and never contacts anyone. Design in [designs/nucleus.md](designs/nucleus.md).
 
-### `blind-spots`
+### `radar`
 
-A gap analysis, run only when the owner asks. Where `agenda` ranks the open items that exist, this skill looks for what is absent. It reads the active projects, their plan and prep notes, the last 7 days of their logs and the inbox, lists the dated events in the next 21 days and plans back from each one with seven checks: decisions, information, inputs, people, prep, rhythm and promises. A candidate that a newer log entry or a dated open item covers is dropped. The report holds at most 10 gaps, grouped by the date they must be closed, and every line names its project. Read-only by default: on request it saves the gaps as `Inferred:` bullets, one capture per org, `inbox/YYYY-MM-DD-blind-spots-<org>.md`. A single gap can be handed to `nucleus`. Design in [designs/blind-spots.md](designs/blind-spots.md).
+A gap analysis, run only when the owner asks. Where `agenda` ranks the open items that exist, this skill looks for what is absent. It reads the active projects, their plan and prep notes, the last 7 days of their logs and the inbox, lists the dated events in the next 21 days and plans back from each one with seven checks: decisions, information, inputs, people, prep, rhythm and promises. A candidate that a newer log entry or a dated open item covers is dropped. The report holds at most 10 gaps, grouped by the date they must be closed, and every line names its project. Read-only by default: on request it saves the gaps as `Inferred:` bullets, one capture per org, `inbox/YYYY-MM-DD-radar-<org>.md`. A single gap can be handed to `nucleus`. Design in [designs/radar.md](designs/radar.md).
 
 ### Plugin
 

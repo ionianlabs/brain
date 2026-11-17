@@ -7,9 +7,9 @@ updated: 2026-11-17
 
 # Copilot from inside a work repo
 
-The simplest route is the plugin. It works in Copilot CLI and in VS Code, and it brings the eight skills (`agenda`, `drop`, `triage`, `sync`, `aware`, `outbox`, `nucleus` and `blind-spots`) to every repo. See [the Brain plugin](plugin.md).
+The simplest route is the plugin. It works in Copilot CLI and in VS Code, and it brings the eight skills (`agenda`, `drop`, `triage`, `sync`, `aware`, `outbox`, `nucleus` and `radar`) to every repo. See [the Brain plugin](plugin.md).
 
-Each skill works on one thing and answers one question. In Copilot, run it with its slash command, for example `/agenda`, `/nucleus` or `/blind-spots`:
+Each skill works on one thing and answers one question. In Copilot, run it with its slash command, for example `/agenda`, `/nucleus` or `/radar`:
 
 | Skill | Works on | Question it answers |
 |---|---|---|
@@ -20,7 +20,7 @@ Each skill works on one thing and answers one question. In Copilot, run it with 
 | `aware` | What Ionian Flow's Aware proposed from meetings | Which proposals do I accept? |
 | `outbox` | Brain content, for one named audience | What is safe to share with them? |
 | `nucleus` | One named thing | What is the smallest unblocker? |
-| `blind-spots` | The dated events of the coming weeks | What should exist by now and does not? |
+| `radar` | The dated events of the coming weeks | What should exist by now and does not? |
 
 If your organization blocks plugins, use one of the two routes below. Neither puts files into your work repo.
 

@@ -1,8 +1,8 @@
 {
   "name": "brain",
   "displayName": "Ionian Brain",
-  "version": "0.9.0",
-  "description": "One memory for all agents, in plain markdown. Eight skills (agenda, drop, triage, sync, aware, outbox, nucleus and blind-spots) that read and write your brain folder directly. No CLI, agents or hooks.",
+  "version": "0.9.1",
+  "description": "One memory for all agents, in plain markdown. Eight skills (agenda, drop, triage, sync, aware, outbox, nucleus and radar) that read and write your brain folder directly. No CLI, agents or hooks.",
   "author": {
     "name": "Ionian Labs",
     "url": "https://ionian.dev"
@@ -21,6 +21,6 @@
     "aware",
     "outbox",
     "nucleus",
-    "blind-spots"
+    "radar"
   ]
 }
