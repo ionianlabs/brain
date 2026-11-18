@@ -172,3 +172,9 @@ test('the fixture AGENTS.md equals the template AGENTS.md except the blocked-ter
   const norm = (f) => fs.readFileSync(f, 'utf8').split('\n').filter((l) => !l.startsWith('- Blocked terms (')).join('\n');
   assert.equal(norm(path.join(DIR, 'AGENTS.md')), norm(path.join(FIXTURES, '..', '..', 'template', 'AGENTS.md')));
 });
+
+test('the existing fixture manifest holds exactly entries 1 to 5', () => {
+  const ids = fs.readFileSync(path.join(DIR, 'outbox/team/manifest.md'), 'utf8').split('\n')
+    .filter((l) => /^\| \d+ /.test(l)).map((l) => l.split('|')[1].trim());
+  assert.deepEqual(ids, ['1', '2', '3', '4', '5']);
+});

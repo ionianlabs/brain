@@ -218,7 +218,7 @@ test('the outbox skill puts Handback before Scope, and rule 13 names the Self-ch
   assert.match(text, new RegExp(`^13\\. Self-check, step ${selfCheck}\\.`, 'm'));
   assert.match(text, /^\s+- Two lines: "not relevant to <audience>: N" and "already shared: N"\./m);
   assert.match(text, /already shared: 0\n/);
-  assert.match(text, /^12\. Summary:.*confidential.*inbox.*other org.*draft.*deprecated.*personal.*already shared/m);
+  assert.match(text, /^13\. Summary:.*confidential.*inbox.*other org.*draft.*deprecated.*personal.*already shared/m);
   }
 });
 
@@ -347,4 +347,72 @@ test('every skill states what it works on and the question it answers, and the R
     for (const doc of ['docs/plugin.md', 'docs/copilot.md']) assert.ok(fs.readFileSync(path.join(ROOT, doc), 'utf8').includes(row), `${doc}: ${name}`);
   }
   assert.equal(new Set(defs.map((r) => r[3])).size, SKILLS.length, 'no two skills answer the same question');
+});
+
+const STATUS_COPIES = ['template/skills/outbox/SKILL.md', 'template/.github/prompts/outbox.prompt.md', 'plugin/skills/outbox/SKILL.md'];
+const readCopy = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8');
+
+test('status F1.19: the outbox skill and prompt name the Status follow-up step, the five states and the Inferred rule', () => {
+  for (const rel of STATUS_COPIES) {
+    const text = readCopy(rel);
+    assert.ok(text.includes('Status follow-up'), rel);
+    for (const s of ['`done`', '`dropped`', '`answered`', '`superseded`', '`reopened`']) assert.ok(text.includes(s), `${rel}: ${s}`);
+    assert.match(text, /An `Inferred:` bullet is never evidence/, rel);
+  }
+});
+
+test('status F2: the skill and prompt name the Status section, the reserved prefix, the project log ref and the section order', () => {
+  for (const rel of STATUS_COPIES) {
+    const text = readCopy(rel);
+    assert.ok(text.includes('## Status'), rel);
+    assert.ok(text.includes('Status: #'), rel);
+    assert.ok(text.includes('Project log YYYY-MM-DD'), rel);
+    assert.ok(text.includes('Decisions, Actions, Dates, Context, Open questions, Status, Files'), rel);
+  }
+});
+
+test('status F3: the old replace-and-withdraw sentence is gone, superseded by is present, status lines are exempt from max_items', () => {
+  for (const rel of STATUS_COPIES) {
+    const text = readCopy(rel);
+    assert.ok(!text.includes('An item that replaces a shared one says which id it replaces and proposes that withdrawal.'), rel);
+    assert.ok(text.includes('superseded by'), rel);
+    assert.ok(text.includes('answered by'), rel);
+    assert.match(text, /Status lines do not count against `brain\.max_items`/, rel);
+    assert.match(text, /not subject to the "more than 10" check/, rel);
+  }
+});
+
+test('status F4: the status only scope exists with the default slug status, and the built plugin has the step and states', () => {
+  for (const rel of STATUS_COPIES) {
+    const text = readCopy(rel);
+    assert.ok(text.includes('status only'), rel);
+    assert.match(text, /slug (defaults to|is) `status`/, rel);
+  }
+  const built = readCopy('plugin/skills/outbox/SKILL.md');
+  assert.match(built, /^\d+\. Status follow-up\b/m);
+  for (const s of ['done', 'dropped', 'answered', 'superseded', 'reopened']) assert.ok(built.includes('`' + s + '`'), s);
+});
+
+test('status: the Status follow-up step sits after Handback and before Scope', () => {
+  for (const rel of STATUS_COPIES) {
+    const text = readCopy(rel);
+    const at = (re) => text.search(re);
+    const [h, s, sc] = [at(/^\d+\. Handback\b/m), at(/^\d+\. Status follow-up\b/m), at(/^\d+\. Scope\b/m)];
+    assert.ok(h >= 0 && s >= 0 && sc >= 0, rel);
+    assert.ok(h < s && s < sc, rel);
+  }
+});
+
+test('status: step references are renumbered and the publisher and withdraw additions are present', () => {
+  for (const rel of STATUS_COPIES) {
+    const text = readCopy(rel);
+    assert.match(text, /^4\. Status follow-up/m, rel);
+    assert.match(text, /^5\. Scope\b/m, rel);
+    assert.match(text, /step 8 drops the duplicates/, rel);
+    assert.match(text, /^13\. Self-check, step 11\./m, rel);
+    assert.match(text, /not followed up/, rel);
+    assert.match(text, /propose again\?/, rel);
+    assert.match(text, /Status: #<ref id> <state>/, rel);
+    assert.match(text, /never contacts? an outlet/i, rel);
+  }
 });
