@@ -11,6 +11,7 @@ brain:
   members: [<person-slug>]
   receives: [<class>, <class>]
   context_sections: [<Section>, <Section>]
+  max_items: <optional item budget per package, for example 5>
 target: {…}  # owned by the publisher, opaque to the brain
 ---
 
@@ -19,7 +20,7 @@ target: {…}  # owned by the publisher, opaque to the brain
      The brain: block is owned by the brain. org is one org, never personal. members are never published.
      receives may only limit the global allowlist. Classes: decisions, dates, actions,
      definitions, roles, metrics, cadence, open-questions, links, files.
-     context_sections is optional. target belongs to the publisher. Keep it as it is.
+     context_sections is optional. max_items is optional: a positive integer, the most items one package proposes. target belongs to the publisher. Keep it as it is.
      Never put blocked terms here. -->
 
 # <Audience>
